@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Content1 from './Content';
+import React from 'react';
 
 // function App() {
 //   const [counter, setCounter] = useState(1);
