@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Content1 from './Content';
 
 // function App() {
 //   const [counter, setCounter] = useState(1);
@@ -128,40 +129,68 @@ import { useState } from 'react';
 // }
 // ============================================================================
 
+// function App() {
+//   const [todo, setTodo] = useState('');
+//   const [todoSub, setTodoSub] = useState(() => {
+//     const localStorage1 = JSON.parse(localStorage.getItem('addLS'));
+//     return localStorage1 ?? []
+//   });
+
+//   const handleChange = (e) => {
+//     const todoEnter = e.target.value;
+
+//     setTodo(todoEnter);
+//   };
+
+//   const handleSubmit = () => {
+//     if (todoSub.includes(todo)) {
+//     } else {
+//       const updatedTodoSub = [...todoSub, todo];
+//        setTodoSub(updatedTodoSub);
+//       localStorage.setItem('addLS', JSON.stringify(updatedTodoSub));
+//     }
+//     setTodo('');
+//   };
+
+//   return (
+//     <div style={{ padding: 32 }}>
+//       <input
+//         type="text"
+//         value={todo}
+//         onChange={handleChange}
+//         placeholder="Enter Todo List"
+//       />
+
+//       <button onClick={handleSubmit}>ClickRadio</button>
+
+//       <ul>
+//         {todoSub.map((todoName, index) => {
+//           return <li key={index}>{todoName}</li>;
+//         })}
+//       </ul>
+//     </div>
+//   );
+// }
+// ============================================================================
+
+// function App() {
+//   const [show, setShow] = useState(false);
+
+//   return (
+//     <div style={{ padding: 32 }}>
+//       <button onClick={() => setShow(!show)}>Toggle</button>
+//       {show && <Content1 />}
+//     </div>
+//   );
+// }
+// ============================================================================
 function App() {
-  const [todo, setTodo] = useState('');
-  const [todoSub, setTodoSub] = useState([]);
-
-  const handleChange = (e) => {
-    const todoEnter = e.target.value;
-
-    setTodo(todoEnter);
-  };
-
-  const handleSubmit = () => {
-    if (todoSub.includes(todo)) {
-    } else {
-      setTodoSub([...todoSub, todo]);
-    }
-    setTodo('');
-  };
+  const [show, setShow] = useState(false);
 
   return (
     <div style={{ padding: 32 }}>
-      <input
-        type="text"
-        value={todo}
-        onChange={handleChange}
-        placeholder="Enter Todo List"
-      />
-
-      <button onClick={handleSubmit}>ClickRadio</button>
-
-      <ul>
-        {todoSub.map((todoName, index) => {
-          return <li key={index}>{todoName}</li>;
-        })}
-      </ul>
+      <button onClick={() => setShow(!show)}>Todo</button>
+      {show && <Content1 />}
     </div>
   );
 }
