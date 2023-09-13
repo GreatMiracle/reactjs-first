@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
 import Content1 from './Content';
 import React from 'react';
+import TodoApp from './Todo';
 
 // function App() {
 //   const [counter, setCounter] = useState(1);
@@ -304,99 +305,8 @@ import React from 'react';
 
 // ============================================================================
 
-const initState = {
-  job: '',
-  jobs: [],
-};
-const SET_ACTION = 'set';
-const ADD_ACTION = 'add';
-const REMOVE_ACTION = 'remove';
-
-const setJob = (payload) => {
-  return {
-    type: SET_ACTION,
-    payload,
-  };
-};
-
-const addJob = (payload) => {
-  return {
-    type: ADD_ACTION,
-    payload,
-  };
-};
-
-const deleteJob = (payload) => {
-  return {
-    type: REMOVE_ACTION,
-    payload,
-  };
-};
-
-const reducer = (state, action) => {
-  let newState;
-  switch (action.type) {
-    case SET_ACTION:
-      newState = {
-        ...state,
-        job: action.payload,
-      };
-      break;
-    case ADD_ACTION:
-      newState = {
-        ...state,
-        jobs: [...state.jobs, action.payload],
-      };
-
-      break;
-
-    case REMOVE_ACTION:
-      const jobsAfferRemove = state.jobs.filter(
-        (element, index) => index !== action.payload
-      );
-      newState = {
-        ...state,
-        jobs: [...jobsAfferRemove],
-      };
-
-      break;
-    default:
-      throw new Error('Invalid...');
-  }
-  return newState;
-};
-
 function App() {
-  const [todo, dispatch] = useReducer(reducer, initState);
-
-  const handleSubmit = () => {
-    dispatch(addJob(todo.job));
-    dispatch(setJob(''));
-  };
-
-  // console.log(todo.job);
-  return (
-    <div style={{ padding: '0 20px' }}>
-      <h3>Todo</h3>
-      <input
-        type="text"
-        value={todo.job}
-        placeholder="Enter todo..."
-        onChange={(e) => dispatch(setJob(e.target.value))}
-      ></input>
-      <button onClick={handleSubmit}>Add</button>
-      <ul>
-        {todo.jobs.map((item, index) => {
-          return (
-            <li key={index}>
-              {item}
-
-              <span onClick={() => dispatch(deleteJob(index))}> x</span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
-  );
+  return <TodoApp />;
 }
+// ============================================================================
 export default App;
