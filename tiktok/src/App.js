@@ -1,7 +1,16 @@
-import { useCallback, useMemo, useReducer, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import Content1 from './Content';
 import React from 'react';
 import TodoApp from './Todo';
+import ContextApp from './ContextApp';
+import themeContextBase from './ContextApp/createContextBase';
 
 // function App() {
 //   const [counter, setCounter] = useState(1);
@@ -305,8 +314,69 @@ import TodoApp from './Todo';
 
 // ============================================================================
 
-function App() {
-  return <TodoApp />;
-}
+// function App() {
+//   return <TodoApp />;
+// }
 // ============================================================================
+
+// console.log(themeContextBase);
+
+// function App() {
+//   const [theme, setTheme] = useState('dark');
+//   const toggleTheme = () => {
+//     setTheme(theme === 'dark' ? 'light' : 'dark');
+//   };
+
+//   return (
+//     <themeContextBase.Provider value={theme}>
+//       <div style={{ padding: 20 }}>
+//         <button onClick={toggleTheme}>Toggle Theme</button>
+//         <ContextApp />
+//       </div>
+//     </themeContextBase.Provider>
+//   );
+// }
+
+// ============================================================================
+
+// import { useStore, setTodoInput, addTodoInput } from './Store';
+// function App() {
+//   const [state, dispatch] = useStore();
+
+//   const handleSubmit = () => {
+//     dispatch(addTodoInput(state.todoInput));
+//   };
+//   console.log(state.todos);
+//   return (
+//     <div style={{padding: 30}}>
+//       <input
+//         value={state.todoInput}
+//         placeholder="Nhập vào đây ...."
+//         onChange={(e) => {
+//           dispatch(setTodoInput(e.target.value));
+//         }}
+//       />
+//       <button onClick={handleSubmit}>Add</button>
+
+//       <br />
+//       {state.todos.map((item, index) => (
+//         <li key={index}>{item}</li>
+//       ))}
+//     </div>
+//   );
+// }
+
+// ============================================================================
+
+import {Video} from './VideoApp';
+function App() {
+  return (
+    <div>
+      <Video />
+      <br></br>
+      <button>Play</button>
+      <button>Pause</button>
+    </div>
+  );
+}
 export default App;
