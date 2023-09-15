@@ -1,6 +1,6 @@
 import { ADD_TODO_ACTION } from './constants';
 
-const initState = {
+export const initState = {
   filter: {
     search: '',
     status: 'all',
