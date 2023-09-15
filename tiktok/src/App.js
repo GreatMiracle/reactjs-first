@@ -368,14 +368,24 @@ import themeContextBase from './ContextApp/createContextBase';
 
 // ============================================================================
 
-import {Video} from './VideoApp';
+import { Video } from './VideoApp';
 function App() {
+  const videoRef = useRef();
+
+  const handlePlay = () => {
+    videoRef.current.play();
+  };
+
+  const handlePause = () => {
+    videoRef.current.pause();
+  };
+
   return (
     <div>
-      <Video />
+      <Video ref={videoRef} />
       <br></br>
-      <button>Play</button>
-      <button>Pause</button>
+      <button onClick={handlePlay}>Play</button>
+      <button onClick={handlePause}>Pause</button>
     </div>
   );
 }
