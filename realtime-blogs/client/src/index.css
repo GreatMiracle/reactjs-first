@@ -1,3 +1,28 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+*{
+    font-family: 'Montserrat', sans-serif;
+}
+
+input {
+    border: 1px solid #ccc;
+    height: 40px;
+    padding-left: 20px;
+}
+
+input:focus {
+    border: 1px solid rgb(40, 40, 40);
+    outline: none;
+}
+
+.primary-contained-btn {
+    background-color: #016A70;
+    height: 40px;
+    padding: 0 20px;
+    color: white;
+}
