@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { registerAPICall } from '../../services/authService';
 
 function Register() {
   const [user, setUser] = useState({
@@ -9,8 +10,18 @@ function Register() {
     password: '',
   });
 
-  const handleBtnRegister = () => {
-    console.log('btn register !!!', user);
+  const handleBtnRegister = async () => {
+    try {
+      const response = await registerAPICall(user);
+
+      if (response.success) {
+        alert(response.message);
+      } else {
+        alert(response.message);
+      }
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (

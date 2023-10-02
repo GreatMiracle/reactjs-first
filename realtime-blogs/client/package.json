@@ -44,5 +44,10 @@
   },
   "devDependencies": {
     "tailwindcss": "^3.3.3"
-  }
+  },
+  "description": "npm install -D tailwindcss npx tailwindcss init|",
+  "main": "tailwind.config.js",
+  "author": "",
+  "license": "ISC",
+  "proxy": "http://localhost:5000"
 }

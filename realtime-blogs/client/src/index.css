@@ -1,11 +1,10 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-*{
+* {
     font-family: 'Montserrat', sans-serif;
 }
 
@@ -25,4 +24,10 @@ input:focus {
     height: 40px;
     padding: 0 20px;
     color: white;
+}
+
+.outline-btn {
+    border: 1px solid #706501;
+    color: #706501;
+    padding: 0 20px;
 }
