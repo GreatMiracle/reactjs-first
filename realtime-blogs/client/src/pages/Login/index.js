@@ -1,15 +1,38 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { loginAPICall, storeToken } from '../../services/authService';
+import { useNavigate, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast';
+
 
 function Login() {
   const [user, setUser] = useState({
     email: '',
     password: '',
   });
+  const navigate = useNavigate()
 
-  const handleBtnLogin = () => {
-    console.log('btn register !!!', user);
+  useEffect(() => {
+    if (localStorage.getItem("token"))
+      console.log(localStorage.getItem("token"));
+      navigate('/')
+  }, [])
+
+  const handleBtnLogin = async () => {
+    try {
+      const response = await loginAPICall(user.email, user.password);
+      const { message, success, token } = response.data;
+      if (success) {
+        storeToken(token);
+        toast.success(message);
+        navigate('/')
+      } else {
+        toast.success(message);
+      }
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (

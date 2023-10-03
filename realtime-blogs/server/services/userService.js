@@ -1,26 +1,21 @@
-const express = require('express');
 const User = require('../models/userModel');
 
 
-const registerUserService = async (req, res) => {
+const getCurrentUserService = async (req, res) => {
+    console.log("--------------------------------------GET CURRENT USER--------------------------------------------------");
     try {
-        const user = await User.findOne({ email: req.body.email });
-        if (user) {
+
+        const user = await User.findOne({ _id: req.body.userId }).select('-password');
+        if (!user) {
             return res.send({
-                message: "User already in Database",
+                message: "User does not exist",
                 success: false
             })
         }
-
-        console.log("aaaaaaaaaaaaaaaaaaa");
-        const hashedPassword = await bcryptjs.hash(req.body.password, 10);
-        req.body.password = hashedPassword;
-
-        const createUser = new User(req.body);
-        await createUser.save();
         return res.send({
-            message: "Create User successfully!",
-            success: true
+            message: "User fetched successfully!",
+            success: true,
+            data: user
         })
 
     } catch (error) {
@@ -29,9 +24,8 @@ const registerUserService = async (req, res) => {
             success: false
         })
     }
-};
-
+}
 
 module.exports = {
-    registerUserService
+    getCurrentUserService
 }

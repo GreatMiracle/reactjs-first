@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const MONGO_URL = process.env.MONGO_URL;
 
 const db = mongoose.connection;
-mongoose.connect(MONGO_URL)
+mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+
 
 db.on('connected', () => {
     console.log('MongoDB connection successful');

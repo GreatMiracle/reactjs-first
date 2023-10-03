@@ -9,13 +9,15 @@ const port = process.env.PORT || 5000;
 
 const dbConfig = require('./config/dbConfig');
 
-const cors = require("./config/corsConfig");
-app.use(cors);
+const corsConfig = require("./config/corsConfig");
+app.use(corsConfig);
 
-const routerWeb = require('./routers/userRouter');
+const routerWebAuth = require('./routers/authRouter');
+const routerWebUser = require('./routers/userRouter');
 
 app.use(express.json());
-app.use('/', routerWeb);
+app.use('/auth/', routerWebAuth);
+app.use('/api/user/', routerWebUser);
 
 
 app.listen(port, () => console.log(`Server ok running on port ${port}`));

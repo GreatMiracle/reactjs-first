@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const AUTH_REST_API_BASE_URL = "http://localhost:5000"
+const AUTH_REST_API_BASE_URL = "http://localhost:5000/auth"
 
 export const registerAPICall = async (registerObj) => await axios.post(AUTH_REST_API_BASE_URL + '/register', registerObj);
 
-export const loginAPICall = async (usernameOrEmail, password) => await axios.post(AUTH_REST_API_BASE_URL + '/login', { usernameOrEmail, password });
+export const loginAPICall = async (email, password) => await axios.post(AUTH_REST_API_BASE_URL + '/login', { email, password });
 
 export const storeToken = (token) => localStorage.setItem("token", token);
 

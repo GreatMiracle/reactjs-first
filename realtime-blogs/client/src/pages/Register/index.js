@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { registerAPICall } from '../../services/authService';
 
 function Register() {
@@ -9,15 +9,25 @@ function Register() {
     email: '',
     password: '',
   });
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (localStorage.getItem("token"))
+      console.log(localStorage.getItem("token"));
+    navigate('/')
+  }, []);
+
 
   const handleBtnRegister = async () => {
     try {
       const response = await registerAPICall(user);
-
-      if (response.success) {
-        alert(response.message);
+      const { message, success } = response.data;
+      if (success) {
+        console.log(response);
+        alert(message);
       } else {
-        alert(response.message);
+        console.log(response);
+        alert(message);
       }
     } catch (error) {
       alert(error.message);
