@@ -9,13 +9,13 @@ import Loader from './components/loader';
 
 function App() {
 
-  const { loader } = useSelector(state => state.loader.loader)
+  const { loader } = useSelector(state => state.loader)
   console.log(loader);
 
   return (
     <div>
       <Toaster position="top-right" reverseOrder={false} />
-      {!loader && <Loader />}
+      {loader && <Loader />}
       <BrowserRouter>
         <Routes>
           <Route path="/" element={

@@ -2,8 +2,11 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerAPICall } from '../../services/authService';
+import { useDispatch } from 'react-redux';
+import { HideLoader, ShowLoader } from '../../redux/loaderSlice';
 
 function Register() {
+  const dispatch = useDispatch();
   const [user, setUser] = useState({
     name: '',
     email: '',
@@ -12,15 +15,16 @@ function Register() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (localStorage.getItem("token"))
-      console.log(localStorage.getItem("token"));
-    navigate('/')
+    if (localStorage.getItem("token")) {
+      navigate('/')
+    }
   }, []);
-
 
   const handleBtnRegister = async () => {
     try {
+      dispatch(ShowLoader());
       const response = await registerAPICall(user);
+      dispatch(HideLoader());
       const { message, success } = response.data;
       if (success) {
         console.log(response);
@@ -31,6 +35,9 @@ function Register() {
       }
     } catch (error) {
       alert(error.message);
+      dispatch(
+        HideLoader()
+      );
     }
   };
 
@@ -67,7 +74,7 @@ function Register() {
             Đăng kí
           </button>
           <Link
-            to="/login"
+            to="/auth/login"
             className="text-center text-primary underline text-xs/[5px]"
           >
             Already have an account? Login

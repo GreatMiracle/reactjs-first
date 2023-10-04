@@ -2,11 +2,15 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { loginAPICall, storeToken } from '../../services/authService';
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { HideLoader, ShowLoader } from '../../redux/loaderSlice';
 
 
 function Login() {
+  const dispatch = useDispatch();
+
   const [user, setUser] = useState({
     email: '',
     password: '',
@@ -14,14 +18,16 @@ function Login() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (localStorage.getItem("token"))
-      console.log(localStorage.getItem("token"));
+    if (localStorage.getItem("token")) {
       navigate('/')
+    }
   }, [])
 
   const handleBtnLogin = async () => {
     try {
+      dispatch(ShowLoader());
       const response = await loginAPICall(user.email, user.password);
+      dispatch(HideLoader());
       const { message, success, token } = response.data;
       if (success) {
         storeToken(token);
@@ -31,6 +37,7 @@ function Login() {
         toast.success(message);
       }
     } catch (error) {
+      dispatch(HideLoader());
       alert(error.message);
     }
   };
@@ -61,10 +68,10 @@ function Login() {
             Đăng kí
           </button>
           <Link
-            to="/register"
+            to="/auth/register"
             className="text-center text-primary underline text-xs/[5px]"
           >
-            Already have an account? Login
+            Don't have an account? Register
           </Link>
         </div>
       </div>
