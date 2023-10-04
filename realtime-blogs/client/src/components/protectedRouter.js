@@ -1,23 +1,33 @@
 import React, { useEffect, useState } from 'react'
-import { getCurrentUser } from '../services/userService';
+import { getAllUser, getCurrentUser } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import loaderSlice from '../redux/loaderSlice';
+import { useSelector } from 'react-redux';
+import { SetAllUser, SetUser } from '../redux/userSlice';
+import { logout } from '../services/authService';
 
 function ProtectedRouter({ children }) {
   const dispatch = useDispatch();
+  const { user } = useSelector(state => state.userReducer);
 
-  const [user, setUser] = useState([]);
+  // const [user, setUser] = useState([]);
   const navigate = useNavigate();
   const currentUserInfo = async () => {
     console.log("currentUserInfo start");
     try {
       dispatch(loaderSlice.actions.ShowLoader());
       const response = await getCurrentUser();
+      const responseAllUsers = await getAllUser();
       dispatch(loaderSlice.actions.HideLoader());
+
       if (response.success) {
-        setUser(response.data)
+        console.log(response.data);
+        dispatch(SetUser(response.data));
+        dispatch(SetAllUser(responseAllUsers.data))
+        // setUser(response.data)
+        console.log(user);
       } else {
         toast.error(response.message);
         navigate("/auth/login");
@@ -40,10 +50,34 @@ function ProtectedRouter({ children }) {
 
 
   return (
-    <div>
-      {user.name}
+    <div className="h-screen w-screen bg-gray-100 p-2">
+      <div className='flex justify-between p-2'>
+        <div className='flex items-center gap-1'>
+          <i className="ri-message-3-line text-3xl"></i>
+          <h1 className='text-primary text-3xl font-bold'>ChatBOT</h1>
+        </div>
+        <div className='flex gap-1 text-2xl items-center'>
+          <i className="ri-shield-user-line text-2xl"></i>
+          <h1 className="underline">{user?.name}</h1>
+          <div className='group relative'>
+            <i className="ri-logout-circle-r-line text-2xl pl-5 cursor-pointer"
+              onClick={() => {
+                logout();
+                navigate("/auth/login")
 
-      {children}</div>
+              }}
+            >
+            </i>
+          </div>
+
+        </div>
+      </div>
+
+      <div className='p-5'>
+        {children}
+      </div>
+
+    </div>
   )
 }
 

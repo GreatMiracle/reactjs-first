@@ -11,3 +11,11 @@ export const getCurrentUser = async () => {
     }
 }
 
+export const getAllUser = async () => {
+    try {
+        const response = await axios.get(AUTH_REST_API_BASE_URL + "/user/get-all-users");
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+}

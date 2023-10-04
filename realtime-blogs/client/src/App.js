@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast'
 import ProtectedRouter from './components/protectedRouter';
 import { useSelector } from 'react-redux';
 import Loader from './components/loader';
+import 'remixicon/fonts/remixicon.css'
 
 function App() {
 

@@ -26,6 +26,27 @@ const getCurrentUserService = async (req, res) => {
     }
 }
 
+
+const getAllUserService = async (req, res) => {
+    console.log("--------------------------------------GET ALL USER--------------------------------------------------");
+    try {
+        const allUsers = await User.find({ _id: { $ne: req.body.userId } }).select('-password');
+        return res.send({
+            message: "User fetched successfully!",
+            success: true,
+            data: allUsers
+        })
+
+    } catch (error) {
+        return res.send({
+            message: error.message,
+            success: false
+        })
+    }
+}
+
+
 module.exports = {
     getCurrentUserService
+    , getAllUserService
 }
