@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { createNewChat, createNewChatApi } from '../../../services/chatService';
+import { createNewChat, createNewChatApi, getDetailChatApi } from '../../../services/chatService';
 import { SetAllChats, SetSelectChat } from '../../../redux/chatSlice';
 import { HideLoader, ShowLoader } from '../../../redux/loaderSlice';
 
@@ -23,19 +23,43 @@ function getRandomColor() {
 
 
 function UserList({ searchKey }) {
+
   const dispatch = useDispatch();
   const { allUsers, user } = useSelector(state => state.userReducer);
   const { allChats } = useSelector(state => state.chatReducer);
-  console.log(allChats);
+  console.log("allChats", allChats);
+
+  const getData = () => {
+    return allUsers
+      .filter((u) => {
+        return (
+          u.name.toLowerCase().includes(searchKey.toLowerCase())
+          // && searchKey
+        )
+          || allChats.some((chat) => chat.members.map((mem) => mem._id).includes(u._id))
+      })
+  }
+
+
+  const checkExistChat = (idCurrentUser) => {
+    const isExistChat = !allChats.map((chat) => chat.members.map((m) => (m._id)))
+      .find((memC) => memC.includes(idCurrentUser));
+    console.log("isExistChat", isExistChat);
+    return isExistChat;
+  }
+
   const createNewChat = async (receipentUserId) => {
-    console.log("button");
     dispatch(ShowLoader());
     const response = await createNewChatApi([user._id, receipentUserId]);
     dispatch(HideLoader());
     if (response.success) {
-      const newChat = response.data;
+      // const newChat = response.data;
+      const newChatId = response.data._id;
+      console.log(newChatId);
+
+      const newChat = await getDetailChatApi(newChatId);
       console.log("newChat", newChat);
-      const updateChats = [...allChats, newChat];
+      const updateChats = [...allChats, newChat.data];
       dispatch(SetAllChats(updateChats));
       dispatch(SetSelectChat(newChat));
     }
@@ -44,16 +68,25 @@ function UserList({ searchKey }) {
   const openChat = async (receipentUserId) => {
     console.log(allChats);
 
-    const chat = allChats.find(
-      (chat) => {
-        return (
-          chat.members.includes(user._id)
-          && chat.members.includes(receipentUserId)
-        )
+    // const chat =
+    //   allChats.find(
+    //     (chat) => {
+    //       return (
+    //         chat.members.includes(user._id)
+    //         && chat.members.includes(receipentUserId)
+    //       )
+    //     }
+    //   );
 
-      }
-    );
+    const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
+      .find((memC) => {
+        return (
+          memC.includes(user._id) && memC.includes(receipentUserId)
+        )
+      });
+
     console.log("chat----------------------", chat);
+
     if (chat) {
       dispatch(SetSelectChat(chat))
     } else {
@@ -63,10 +96,7 @@ function UserList({ searchKey }) {
 
   return (
     <div className='flex flex-col gap-3 mt-5'>
-      {allUsers
-        .filter((u) => {
-          return u.name.toLowerCase().includes(searchKey.toLowerCase())
-        })
+      {getData()
         .map((item) => {
 
           return (
@@ -93,16 +123,27 @@ function UserList({ searchKey }) {
                 <h1>{item.name}</h1>
               </div>
               <div>
-                {!allChats.find((chat) => chat.members.includes(item._id)) && (
-                  <button className='border-gray-300 bg-white px-3 py-1 rounded-md text-gray-400'
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      createNewChat(item._id);
-                    }}
-                  >
-                    Start a conversation
-                  </button>
-                )}
+
+                {console.log(item)}
+
+                {
+
+                  // console.log("aaaaaaaaaaa", allChats.map((chat) => chat.members.map((m) => (m._id))).find((memC) => memC.includes(item._id))   )
+                  // console.log("isExistChat", !allChats.map((chat) => chat.members.map((m) => (m._id)))
+                  //   .find((memC) => memC.includes(item._id)))
+
+                  checkExistChat(item._id)
+                  && (
+                    <button className='border-gray-300 bg-white px-3 py-1 rounded-md text-gray-400'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        createNewChat(item._id);
+                      }}
+                    >
+                      Start a conversation
+                    </button>
+                  )
+                }
 
               </div>
 

@@ -18,3 +18,12 @@ export const getAllChats = async () => {
         return error.response.data;
     }
 }
+
+export const getDetailChatApi = async (id) => {
+    try {
+        const response = await axios.get(AUTH_REST_API_BASE_URL + "/get-detail-chat/" + id);
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+}

@@ -17,17 +17,16 @@ function ProtectedRouter({ children }) {
   // const [user, setUser] = useState([]);
   const navigate = useNavigate();
   const currentUserInfo = async () => {
-    console.log("currentUserInfo start");
     try {
       dispatch(loaderSlice.actions.ShowLoader());
       const response = await getCurrentUser();
       const responseAllUsers = await getAllUser();
       const responseAllChats = await getAllChats();
-      console.log(responseAllChats);
+      console.log("responseAllChats", responseAllChats);
       dispatch(loaderSlice.actions.HideLoader());
 
       if (response.success) {
-        console.log(response.data);
+        console.log("curent User", response.data);
         dispatch(SetUser(response.data));
         dispatch(SetAllUser(responseAllUsers.data))
 
@@ -45,7 +44,6 @@ function ProtectedRouter({ children }) {
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      console.log(localStorage.getItem("token"));
       currentUserInfo();
     } else {
       navigate("/auth/login");

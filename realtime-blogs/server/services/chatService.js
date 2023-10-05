@@ -30,12 +30,34 @@ const getAllChatsService = async (req, res) => {
             .populate("members")
             .sort({ updateAt: -1 });
 
-        console.log(allChats);
-
         return res.send({
-            message: "Chat created successfully!",
+            message: "Get all Chats successfully!",
             success: true,
             data: allChats
+        })
+
+    } catch (error) {
+        return res.send({
+            message: "Error creating chat",
+            success: false,
+            error: error.message
+        })
+    }
+}
+
+
+const getDetailChatService = async (req, res) => {
+    console.log("--------------------------------------DETAIL CHAT--------------------------------------------------");
+    try {
+
+        console.log("req.params.id", req.params.id);
+        const detailChat = await Chat.findById(req.params.id)
+            .populate("members");
+
+        return res.send({
+            message: "Get detail Chat successfully!",
+            success: true,
+            data: detailChat
         })
 
     } catch (error) {
@@ -50,4 +72,5 @@ const getAllChatsService = async (req, res) => {
 module.exports = {
     createNewChatService
     , getAllChatsService
+    , getDetailChatService
 }
