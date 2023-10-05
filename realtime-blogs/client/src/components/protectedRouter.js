@@ -7,6 +7,8 @@ import loaderSlice from '../redux/loaderSlice';
 import { useSelector } from 'react-redux';
 import { SetAllUser, SetUser } from '../redux/userSlice';
 import { logout } from '../services/authService';
+import { getAllChats } from '../services/chatService';
+import { SetAllChats } from '../redux/chatSlice';
 
 function ProtectedRouter({ children }) {
   const dispatch = useDispatch();
@@ -20,14 +22,17 @@ function ProtectedRouter({ children }) {
       dispatch(loaderSlice.actions.ShowLoader());
       const response = await getCurrentUser();
       const responseAllUsers = await getAllUser();
+      const responseAllChats = await getAllChats();
+      console.log(responseAllChats);
       dispatch(loaderSlice.actions.HideLoader());
 
       if (response.success) {
         console.log(response.data);
         dispatch(SetUser(response.data));
         dispatch(SetAllUser(responseAllUsers.data))
-        // setUser(response.data)
-        console.log(user);
+
+        dispatch(SetAllChats(responseAllChats.data))
+
       } else {
         toast.error(response.message);
         navigate("/auth/login");
@@ -45,12 +50,10 @@ function ProtectedRouter({ children }) {
     } else {
       navigate("/auth/login");
     }
-
   }, [])
 
-
   return (
-    <div className="h-screen w-screen bg-gray-100 p-2">
+    <div className="bg-gray-100 p-2 min-h-screen">
       <div className='flex justify-between p-2'>
         <div className='flex items-center gap-1'>
           <i className="ri-message-3-line text-3xl"></i>

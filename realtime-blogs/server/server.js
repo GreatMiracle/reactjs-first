@@ -14,10 +14,12 @@ app.use(corsConfig);
 
 const routerWebAuth = require('./routers/authRouter');
 const routerWebUser = require('./routers/userRouter');
+const routerChat = require('./routers/chatRouter');
 
 app.use(express.json());
 app.use('/auth/', routerWebAuth);
 app.use('/api/user/', routerWebUser);
+app.use('/api/chat/', routerChat);
 
 
 app.listen(port, () => console.log(`Server ok running on port ${port}`));

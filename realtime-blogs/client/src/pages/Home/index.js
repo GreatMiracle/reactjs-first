@@ -6,15 +6,17 @@ import UserList from './components/userList';
 function Home() {
   const [searchKey, setSearchKey] = useState("");
   return (
-    <div className='flex gap-5'>
+    <div className='flex gap-5 '>
 
-      <div className='w-96'>
+      <div className='w-96 '>
         <UserSearch
           searchKey={searchKey}
           setSearchKey={setSearchKey}
         />
 
-        <UserList />
+        <UserList
+          searchKey={searchKey}
+        />
       </div>
 
 
