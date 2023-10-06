@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { HideLoader, ShowLoader } from '../../redux/loaderSlice';
+import { getCurrentUser } from '../../services/userService';
 
 
 function Login() {
@@ -19,9 +20,24 @@ function Login() {
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
-      navigate('/')
+      currentUserInfo();
     }
   }, [])
+
+
+  const currentUserInfo = async () => {
+    try {
+      const response = await getCurrentUser();
+      if (response.success) {
+        navigate('/')
+      } else {
+        toast.error("Email or password does not exist !");
+      }
+    } catch (error) {
+      toast.error("Email or password does not exist !")
+    }
+  }
+
 
   const handleBtnLogin = async () => {
     try {

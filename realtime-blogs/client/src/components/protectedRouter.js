@@ -13,34 +13,12 @@ import { SetAllChats } from '../redux/chatSlice';
 function ProtectedRouter({ children }) {
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.userReducer);
-
   // const [user, setUser] = useState([]);
   const navigate = useNavigate();
-  const currentUserInfo = async () => {
-    try {
-      dispatch(loaderSlice.actions.ShowLoader());
-      const response = await getCurrentUser();
-      const responseAllUsers = await getAllUser();
-      const responseAllChats = await getAllChats();
-      console.log("responseAllChats", responseAllChats);
-      dispatch(loaderSlice.actions.HideLoader());
 
-      if (response.success) {
-        console.log("curent User", response.data);
-        dispatch(SetUser(response.data));
-        dispatch(SetAllUser(responseAllUsers.data))
-
-        dispatch(SetAllChats(responseAllChats.data))
-
-      } else {
-        toast.error(response.message);
-        navigate("/auth/login");
-      }
-    } catch (error) {
-      dispatch(loaderSlice.actions.HideLoader());
-      navigate("/auth/login");
-    }
-  }
+  const [isResponseReceived, setIsResponseReceived] = useState(false);
+  // Thêm biến cờ fix Lỗi màn hình home xuất hiện 
+  // trong một khoảng thời gian ngắn trước khi chuyển đến trang login
 
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -49,6 +27,41 @@ function ProtectedRouter({ children }) {
       navigate("/auth/login");
     }
   }, [])
+
+  const currentUserInfo = async () => {
+    try {
+      dispatch(loaderSlice.actions.ShowLoader());
+      const response = await getCurrentUser();
+      dispatch(loaderSlice.actions.HideLoader());
+
+      if (response.success) {
+        dispatch(loaderSlice.actions.ShowLoader());
+        const responseAllUsers = await getAllUser();
+        const responseAllChats = await getAllChats();
+        dispatch(loaderSlice.actions.HideLoader());
+
+        console.log("curent User", response.data);
+        dispatch(SetUser(response.data));
+        dispatch(SetAllUser(responseAllUsers.data))
+        dispatch(SetAllChats(responseAllChats.data))
+
+        setIsResponseReceived(true);
+
+      } else {
+        setIsResponseReceived(false);
+        dispatch(loaderSlice.actions.HideLoader());
+        navigate("/auth/login");
+      }
+    } catch (error) {
+      setIsResponseReceived(false);
+      dispatch(loaderSlice.actions.HideLoader());
+      navigate("/auth/login");
+    }
+  }
+
+  if (!isResponseReceived) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-100 p-2 min-h-screen">

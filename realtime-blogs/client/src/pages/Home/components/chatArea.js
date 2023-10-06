@@ -72,7 +72,7 @@ function ChatArea() {
         }
     };
 
-    console.log("message123", message);
+    // console.log("message123", message);
 
     return (
         <>
