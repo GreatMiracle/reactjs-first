@@ -20,7 +20,7 @@ function Home() {
       </div>
 
 
-      <div>
+      <div className='w-full'>
         <ChatArea />
       </div>
 

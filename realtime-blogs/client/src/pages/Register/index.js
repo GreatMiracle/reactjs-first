@@ -29,6 +29,7 @@ function Register() {
       if (success) {
         console.log(response);
         alert(message);
+        navigate('/auth/login')
       } else {
         console.log(response);
         alert(message);

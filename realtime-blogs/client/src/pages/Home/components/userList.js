@@ -23,12 +23,11 @@ function getRandomColor() {
 
 
 function UserList({ searchKey }) {
+  // const ramdomBgColor = getRandomColor();
 
   const dispatch = useDispatch();
   const { allUsers, user } = useSelector(state => state.userReducer);
-  const { allChats } = useSelector(state => state.chatReducer);
-  console.log("allChats", allChats);
-
+  const { allChats, selectChat } = useSelector(state => state.chatReducer);
   const getData = () => {
     return allUsers
       .filter((u) => {
@@ -44,7 +43,6 @@ function UserList({ searchKey }) {
   const checkExistChat = (idCurrentUser) => {
     const isExistChat = !allChats.map((chat) => chat.members.map((m) => (m._id)))
       .find((memC) => memC.includes(idCurrentUser));
-    console.log("isExistChat", isExistChat);
     return isExistChat;
   }
 
@@ -55,19 +53,15 @@ function UserList({ searchKey }) {
     if (response.success) {
       // const newChat = response.data;
       const newChatId = response.data._id;
-      console.log(newChatId);
 
       const newChat = await getDetailChatApi(newChatId);
-      console.log("newChat", newChat);
       const updateChats = [...allChats, newChat.data];
       dispatch(SetAllChats(updateChats));
-      dispatch(SetSelectChat(newChat));
+      dispatch(SetSelectChat(newChat.data));
     }
   }
 
   const openChat = async (receipentUserId) => {
-    console.log(allChats);
-
     // const chat =
     //   allChats.find(
     //     (chat) => {
@@ -77,7 +71,8 @@ function UserList({ searchKey }) {
     //       )
     //     }
     //   );
-
+    console.log("receipentUserId", receipentUserId);
+    console.log("allChats", allChats);
     const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
       .find((memC) => {
         return (
@@ -85,13 +80,29 @@ function UserList({ searchKey }) {
         )
       });
 
-    console.log("chat----------------------", chat);
+    const chat1 = allChats.find((chat) => {
+      return chat.members.map((m) => (m._id)).includes(receipentUserId)
+      // .find((memC) => {
+      //   return (
+      //     memC.includes(user._id) && memC.includes(receipentUserId)
+      //   )
+      // })
+    });
 
-    if (chat) {
-      dispatch(SetSelectChat(chat))
+    console.log("chat1", chat1);
+    console.log("chat", chat);
+    if (chat1) {
+      dispatch(SetSelectChat(chat1))
     } else {
       createNewChat(receipentUserId);
     }
+  }
+
+  const getSelectChatOrNot = (receipentUserId) => {
+    if (selectChat) {
+      return selectChat.members.map((m) => m._id).includes(receipentUserId);
+    }
+    return false;
   }
 
   return (
@@ -102,7 +113,9 @@ function UserList({ searchKey }) {
           return (
             <div
               key={item._id}
-              className='shadow-sm border p-5 rounded-2xl bg-white flex justify-between items-center'
+              className={`shadow-sm border p-3 rounded-2xl bg-white flex justify-between items-center  cursor-pointer
+              ${getSelectChatOrNot(item._id) && 'border-primary border-2'}
+              `}
               onClick={() => openChat(item._id)}
             >
               <div className='flex gap-5 items-center'>
@@ -123,11 +136,7 @@ function UserList({ searchKey }) {
                 <h1>{item.name}</h1>
               </div>
               <div>
-
-                {console.log(item)}
-
                 {
-
                   // console.log("aaaaaaaaaaa", allChats.map((chat) => chat.members.map((m) => (m._id))).find((memC) => memC.includes(item._id))   )
                   // console.log("isExistChat", !allChats.map((chat) => chat.members.map((m) => (m._id)))
                   //   .find((memC) => memC.includes(item._id)))
