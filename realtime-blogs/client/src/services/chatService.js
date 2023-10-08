@@ -27,3 +27,12 @@ export const getDetailChatApi = async (id) => {
         return error.response.data;
     }
 }
+
+export const clearChatMessageApi = async (chatId) => {
+    try {
+        const response = await axios.post(AUTH_REST_API_BASE_URL + "/clear-unread-message/", { chat: chatId });
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+}

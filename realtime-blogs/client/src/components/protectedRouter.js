@@ -65,16 +65,16 @@ function ProtectedRouter({ children }) {
 
   return (
     <div className="bg-gray-100 p-2 min-h-screen">
-      <div className='flex justify-between p-2'>
+      <div className='flex justify-between p-2 bg-primary rounded'>
         <div className='flex items-center gap-1'>
-          <i className="ri-message-3-line text-3xl"></i>
-          <h1 className='text-primary text-3xl font-bold'>ChatBOT</h1>
+          <i className="ri-message-3-line text-3xl text-white"></i>
+          <h1 className='text-white text-3xl font-bold'>ChatBOT</h1>
         </div>
         <div className='flex gap-1 text-2xl items-center'>
-          <i className="ri-shield-user-line text-2xl"></i>
-          <h1 className="underline">{user?.name}</h1>
+          <i className="ri-shield-user-line text-2xl text-white"></i>
+          <h1 className="underline text-white">{user?.name}</h1>
           <div className='group relative'>
-            <i className="ri-logout-circle-r-line text-2xl pl-5 cursor-pointer"
+            <i className="ri-logout-circle-r-line text-2xl pl-5 cursor-pointer text-white"
               onClick={() => {
                 logout();
                 navigate("/auth/login")
@@ -87,7 +87,7 @@ function ProtectedRouter({ children }) {
         </div>
       </div>
 
-      <div className='p-5'>
+      <div className='p-2'>
         {children}
       </div>
 

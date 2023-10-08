@@ -1,8 +1,10 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { createNewChat, createNewChatApi, getDetailChatApi } from '../../../services/chatService';
+import { createNewChatApi, getDetailChatApi } from '../../../services/chatService';
 import { SetAllChats, SetSelectChat } from '../../../redux/chatSlice';
 import { HideLoader, ShowLoader } from '../../../redux/loaderSlice';
+import TruncateText from '../../../common/truncateText';
+import moment from 'moment';
 
 
 // const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'amber', 'lime', 'sky'];
@@ -23,12 +25,12 @@ function getRandomColor() {
 
 
 function UserList({ searchKey }) {
-  // const ramdomBgColor = getRandomColor();
 
   const dispatch = useDispatch();
   const { allUsers, user } = useSelector(state => state.userReducer);
   const { allChats, selectChat } = useSelector(state => state.chatReducer);
-  const getData = () => {
+
+  const getUserData = () => {
     return allUsers
       .filter((u) => {
         return (
@@ -38,7 +40,6 @@ function UserList({ searchKey }) {
           || allChats.some((chat) => chat.members.map((mem) => mem._id).includes(u._id))
       })
   }
-
 
   const checkExistChat = (idCurrentUser) => {
     const isExistChat = !allChats.map((chat) => chat.members.map((m) => (m._id)))
@@ -51,7 +52,6 @@ function UserList({ searchKey }) {
     const response = await createNewChatApi([user._id, receipentUserId]);
     dispatch(HideLoader());
     if (response.success) {
-      // const newChat = response.data;
       const newChatId = response.data._id;
 
       const newChat = await getDetailChatApi(newChatId);
@@ -62,17 +62,8 @@ function UserList({ searchKey }) {
   }
 
   const openChat = async (receipentUserId) => {
-    // const chat =
-    //   allChats.find(
-    //     (chat) => {
-    //       return (
-    //         chat.members.includes(user._id)
-    //         && chat.members.includes(receipentUserId)
-    //       )
-    //     }
-    //   );
-    console.log("receipentUserId", receipentUserId);
-    console.log("allChats", allChats);
+    // console.log("receipentUserId", receipentUserId);
+    // console.log("allChats", allChats);
     const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
       .find((memC) => {
         return (
@@ -82,11 +73,6 @@ function UserList({ searchKey }) {
 
     const chat1 = allChats.find((chat) => {
       return chat.members.map((m) => (m._id)).includes(receipentUserId)
-      // .find((memC) => {
-      //   return (
-      //     memC.includes(user._id) && memC.includes(receipentUserId)
-      //   )
-      // })
     });
 
     console.log("chat1", chat1);
@@ -105,62 +91,124 @@ function UserList({ searchKey }) {
     return false;
   }
 
+  const getLastMessage = (receipentUserId) => {
+
+    const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
+    if (!chaterWithCurrenUser) {
+      return "";
+    } else {
+      // console.log("chaterWithCurrenUser.lastMessage", chaterWithCurrenUser);
+      if (chaterWithCurrenUser.lastMessage) {
+
+        const personSendLastMsg = chaterWithCurrenUser.lastMessage.sender === user._id ? "You: " : "";
+        // console.log("chaterWithCurrenUser.lastMessage.text", chaterWithCurrenUser.lastMessage.text);
+
+        const text = chaterWithCurrenUser.lastMessage.text;
+        const lastMsgShow = TruncateText({ text });
+        // return `${personSendLastMsg} ${lastMsgShow} `;
+        return (
+          <div className='flex justify-between w-72'>
+            <h1 className='text-gray-500 text-sm'>
+              {`${personSendLastMsg} ${lastMsgShow}`}
+            </h1>
+            <h1 className='text-gray-500 text-sm mr-2' >
+              {moment(chaterWithCurrenUser.createdAt).format("hh:mm A")}
+            </h1>
+          </div>
+
+        );
+      } else {
+        return "";
+      }
+
+    }
+  }
+
+  const getUnreadMessage = (receipentUserId) => {
+    const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
+    console.log("chaterWithCurrenUser", chaterWithCurrenUser);
+    if (chaterWithCurrenUser && chaterWithCurrenUser.unreadMessages) {
+      return (
+        <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+          {chaterWithCurrenUser.unreadMessages}
+
+        </div>
+      )
+    }
+
+  }
+
+  console.log("getUserData", getUserData());
+  console.log("allChats", allChats);
   return (
-    <div className='flex flex-col gap-3 mt-5'>
-      {getData()
-        .map((item) => {
+    <div className='flex flex-col gap-3 mt-5 w-96'>
+      {getUserData()
+        .map((userItem) => {
 
           return (
             <div
-              key={item._id}
-              className={`shadow-sm border p-3 rounded-2xl bg-white flex justify-between items-center  cursor-pointer
-              ${getSelectChatOrNot(item._id) && 'border-primary border-2'}
+              key={userItem._id}
+              className={`shadow-sm border p-3 rounded-2xl bg-white flex justify-between items-center  cursor-pointer w-full 
+              ${getSelectChatOrNot(userItem._id) && 'border-primary border-2'}
               `}
-              onClick={() => openChat(item._id)}
+              onClick={() => openChat(userItem._id)}
             >
-              <div className='flex gap-5 items-center'>
-                {item.profilePic && (
-                  <img src={item.profilePic}
+              <div className='flex gap-3 items-center w-full'>
+                {userItem.profilePic && (
+                  <img src={userItem.profilePic}
                     alt='profile Pic'
                     className='w-10 h-10 rounded-full'
                   />
                 )}
-                {!item.profilePic && (
+                {!userItem.profilePic && (
                   <div
                     className={`${getRandomColor()} text-white rounded-full w-10 h-10 flex items-center justify-center mx-1`} >
-                    <h1 className='uppercase text-4xl font-semibold'>{item.name[0]} </h1>
+                    <h1 className='uppercase text-4xl font-semibold'>{userItem.name[0]} </h1>
                   </div>
                 )}
 
+                <div className='flex flex-col'>
+                  <div className='flex gap-2'>
+                    <h1>{userItem.name}</h1>
+                    {getUnreadMessage(userItem._id)}
+                  </div>
 
-                <h1>{item.name}</h1>
-              </div>
-              <div>
-                {
-                  // console.log("aaaaaaaaaaa", allChats.map((chat) => chat.members.map((m) => (m._id))).find((memC) => memC.includes(item._id))   )
-                  // console.log("isExistChat", !allChats.map((chat) => chat.members.map((m) => (m._id)))
-                  //   .find((memC) => memC.includes(item._id)))
 
-                  checkExistChat(item._id)
-                  && (
-                    <button className='border-gray-300 bg-white px-3 py-1 rounded-md text-gray-400'
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        createNewChat(item._id);
-                      }}
-                    >
-                      Start a conversation
-                    </button>
-                  )
-                }
+                  {!checkExistChat(userItem._id)
+                    && (
+                      getLastMessage(userItem._id)
+                        ? getLastMessage(userItem._id)
+                        : <h1 className='text-gray-500 text-sm'> {`Say hello to ${userItem.name}`}</h1>
+                    )}
+                </div>
 
               </div>
+              {
+                checkExistChat(userItem._id)
+                && (
+                  <button className='border-gray-300 bg-white px-3 py-1 rounded-md text-gray-400'
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      createNewChat(userItem._id);
+                    }}
+                  >
+                    Start a conversation
+                  </button>
+                )
+              }
+
 
             </div>)
         })}
 
     </div >
   )
+
+  function hasChatWithReceipent(receipentUserId) {
+    return allChats.find((chat) => {
+      return chat.members.map((m) => (m._id)).includes(receipentUserId);
+    });
+  }
 }
 
 export default UserList

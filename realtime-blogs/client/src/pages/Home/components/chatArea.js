@@ -4,10 +4,12 @@ import { createNewMessage, getAllMessages } from '../../../services/messageServi
 import toast from "react-hot-toast";
 import { HideLoader, ShowLoader } from '../../../redux/loaderSlice';
 import moment from "moment"
+import { clearChatMessageApi } from '../../../services/chatService';
+import { SetAllChats } from '../../../redux/chatSlice';
 
 function ChatArea() {
 
-    const { selectChat } = useSelector((state) => state.chatReducer);
+    const { allChats, selectChat } = useSelector((state) => state.chatReducer);
     const { user } = useSelector((state) => state.userReducer);
     const messageInputRef = useRef(null);
     const [newMessage, SetNewMessage] = useState("");
@@ -16,6 +18,7 @@ function ChatArea() {
 
     useEffect(() => {
         fetchAllMessages();
+        clearUnreadMessage();
     }, [selectChat])
 
     const fetchAllMessages = async () => {
@@ -23,7 +26,7 @@ function ChatArea() {
             dispatch(ShowLoader());
             const response = await getAllMessages(selectChat?._id);
             dispatch(HideLoader());
-            console.log("responseAllM", response);
+            // console.log("responseAllM", response);
             if (response.success) {
                 SetMessage(response.data);
             }
@@ -47,9 +50,6 @@ function ChatArea() {
     };
 
     const handleSendMessage = async () => {
-        console.log('Send message:', newMessage);
-        // Thực hiện xử lý logic gửi tin nhắn ở đây
-
         try {
             dispatch(ShowLoader());
             const messageSend = {
@@ -72,7 +72,29 @@ function ChatArea() {
         }
     };
 
-    // console.log("message123", message);
+    const clearUnreadMessage = async () => {
+        try {
+            dispatch(ShowLoader());
+            console.log("-------------------clearUnreadMessage--------------");
+            const response = await clearChatMessageApi(selectChat?._id);
+            console.log(" clearUnreadMessage response", response);
+            dispatch(HideLoader());
+
+            if (response.success) {
+                const updateChats = allChats.map((chat) => {
+                    if (chat._id === selectChat?._id) {
+                        return response.data;
+                    }
+                    return chat;
+                });
+                dispatch(SetAllChats(updateChats));
+                console.log("updateChats", allChats);
+            }
+        } catch (error) {
+            dispatch(HideLoader());
+            toast.error(error.message)
+        }
+    }
 
     return (
         <>
@@ -100,8 +122,6 @@ function ChatArea() {
                             <hr />
                         </div>
 
-
-
                         {/* -------------------------------------------MESSAGE--------------------------------- */}
 
                         <div className='h-[60vh] overflow-y-scroll p-5'>
@@ -115,21 +135,31 @@ function ChatArea() {
                                             className={`flex ${isCurrentUserSendText && "justify-end"}`}>
                                             <div className='flex flex-col gap-0'>
 
-                                                <h1
-                                                    className={`
-                                            ${isCurrentUserSendText ?
-                                                            "bg-primary text-white rounded-bl-none"
-                                                            : "bg-gray-200 text-primary rounded-tr-none"
-                                                        } p-2 rounded-xl 
-                                            `}
-
+                                                <h1 className={`
+                                                        ${isCurrentUserSendText ?
+                                                        "bg-primary text-white rounded-bl-none"
+                                                        : "bg-gray-200 text-primary rounded-tr-none"
+                                                    } p-2 rounded-xl 
+                                                    `}
                                                 >{msg.text}</h1>
                                                 <h1 className='text-gray-500 text-sm'>{
-
                                                     moment(msg.createdAt).format("hh:mm A")
-
                                                 }</h1>
                                             </div>
+                                            {
+                                                !isCurrentUserSendText &&
+                                                <div className='flex flex-col top-10 justify-center items-center'>
+                                                    <i
+                                                        // className={`ri-check-double-line text-xl
+                                                        className={`ri-checkbox-circle-line text-sm
+                                                        ${msg.read
+                                                                ? "text-blue-500"
+                                                                : "text-gray-400"
+                                                            }`
+                                                        }></i>
+
+                                                </div>
+                                            }
 
 
                                         </div>

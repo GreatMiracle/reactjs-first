@@ -9,6 +9,7 @@ const getAllMessageController = async (req, res) => {
     return results;
 }
 
+
 module.exports = {
     createNewMessageController
     , getAllMessageController

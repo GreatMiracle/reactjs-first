@@ -1,4 +1,5 @@
 const Chat = require("../models/chatModel");
+const Message = require("../models/messageModel");
 
 
 const createNewChatService = async (req, res) => {
@@ -25,11 +26,12 @@ const createNewChatService = async (req, res) => {
 const getAllChatsService = async (req, res) => {
     console.log("--------------------------------------CREATE NEW CHAT--------------------------------------------------");
     try {
-        console.log("req.body>>>>>>>>>>>>>>>>>>>>>>>>>>>", req.body);
+        // console.log("req.body>>>>>>>>>>>>>>>>>>>>>>>>>>>", req.body);
         const allChats = await Chat.find({ members: { $in: [req.body.userId] } })
             .populate("members")
+            .populate("lastMessage")
             .sort({ updateAt: -1 });
-
+        // console.log("allChats", allChats);
         return res.send({
             message: "Get all Chats successfully!",
             success: true,
@@ -69,8 +71,54 @@ const getDetailChatService = async (req, res) => {
     }
 }
 
+
+const unreadMessageChatService = async (req, res) => {
+    console.log("--------------------------------------UNREAD MESSAGE--------------------------------------------------");
+    try {
+        const chat = await Chat.findById(req.body.chat);
+        if (!chat) {
+            return res.send({
+                message: "Chat not found",
+                success: fasle,
+                err: error.message
+            })
+        }
+
+        const updateChat = await Chat.findByIdAndUpdate(
+            req.body.chat,
+            { unreadMessages: 0, },
+            { new: true }
+        )
+            .populate("members")
+            .populate("lastMessage");
+
+        const a = await Message.updateMany(
+            {
+                chat: req.body.chat,
+                read: false
+            },
+            { read: true }
+        );
+
+        return res.send({
+            message: "Unread message clear successfully!",
+            success: true,
+            data: updateChat
+        });
+    }
+    catch (error) {
+        return res.send({
+            message: "Error clear unread message",
+            success: false,
+            err: error.message
+        })
+    }
+
+};
+
 module.exports = {
     createNewChatService
     , getAllChatsService
     , getDetailChatService
+    , unreadMessageChatService
 }

@@ -10,4 +10,5 @@ router.post('/create-message', authMiddleware, createNewMessageController)
 
 router.get('/get-all-message/:chatId', authMiddleware, getAllMessageController)
 
+
 module.exports = router;

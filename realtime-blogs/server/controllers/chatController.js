@@ -1,4 +1,4 @@
-const { createNewChatService, getAllChatsService, getDetailChatService } = require("../services/chatService");
+const { createNewChatService, getAllChatsService, getDetailChatService, unreadMessageChatService } = require("../services/chatService");
 
 const createNewChatController = async (req, res) => {
     const results = await createNewChatService(req, res);
@@ -12,14 +12,19 @@ const getAllChatsController = async (req, res) => {
 }
 
 const getDetailChatController = async (req, res) => {
-    console.log("=-=-=-=-=sf=afasfasf-----------");
     const results = await getDetailChatService(req, res);
     return results;
 }
 
 
+const unreadMessageChatController = async (req, res) => {
+    const results = await unreadMessageChatService(req, res);
+    return results;
+}
+
 module.exports = {
     createNewChatController
     , getAllChatsController
     , getDetailChatController
+    , unreadMessageChatController
 }

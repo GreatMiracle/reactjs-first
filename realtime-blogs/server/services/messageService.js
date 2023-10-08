@@ -49,11 +49,14 @@ const getAllMessageService = async (req, res) => {
     } catch (error) {
         return res.send({
             message: "Error sent message",
-            success: true,
+            success: false,
             err: error.message
         })
     }
 };
+
+
+
 
 module.exports = {
     createNewMessageService
