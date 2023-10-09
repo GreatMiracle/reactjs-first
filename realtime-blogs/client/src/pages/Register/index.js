@@ -27,11 +27,11 @@ function Register() {
       dispatch(HideLoader());
       const { message, success } = response.data;
       if (success) {
-        console.log(response);
+        // console.log(response);
         alert(message);
         navigate('/auth/login')
       } else {
-        console.log(response);
+        // console.log(response);
         alert(message);
       }
     } catch (error) {

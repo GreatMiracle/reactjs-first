@@ -40,7 +40,7 @@ function ProtectedRouter({ children }) {
         const responseAllChats = await getAllChats();
         dispatch(loaderSlice.actions.HideLoader());
 
-        console.log("curent User", response.data);
+        // console.log("curent User", response.data);
         dispatch(SetUser(response.data));
         dispatch(SetAllUser(responseAllUsers.data))
         dispatch(SetAllChats(responseAllChats.data))

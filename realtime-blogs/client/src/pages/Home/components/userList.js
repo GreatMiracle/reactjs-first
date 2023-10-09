@@ -75,8 +75,8 @@ function UserList({ searchKey }) {
       return chat.members.map((m) => (m._id)).includes(receipentUserId)
     });
 
-    console.log("chat1", chat1);
-    console.log("chat", chat);
+    // console.log("chat1", chat1);
+    // console.log("chat", chat);
     if (chat1) {
       dispatch(SetSelectChat(chat1))
     } else {
@@ -97,7 +97,7 @@ function UserList({ searchKey }) {
     if (!chaterWithCurrenUser) {
       return "";
     } else {
-      // console.log("chaterWithCurrenUser.lastMessage", chaterWithCurrenUser);
+      // console.log("chaterWithCurrenUser.lastMessage2", chaterWithCurrenUser);
       if (chaterWithCurrenUser.lastMessage) {
 
         const personSendLastMsg = chaterWithCurrenUser.lastMessage.sender === user._id ? "You: " : "";
@@ -126,7 +126,7 @@ function UserList({ searchKey }) {
 
   const getUnreadMessage = (receipentUserId) => {
     const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
-    console.log("chaterWithCurrenUser", chaterWithCurrenUser);
+    // console.log("chaterWithCurrenUser", chaterWithCurrenUser);
     if (chaterWithCurrenUser && chaterWithCurrenUser.unreadMessages) {
       return (
         <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
@@ -138,8 +138,8 @@ function UserList({ searchKey }) {
 
   }
 
-  console.log("getUserData", getUserData());
-  console.log("allChats", allChats);
+  // console.log("getUserData", getUserData());
+  // console.log("allChats", allChats);
   return (
     <div className='flex flex-col gap-3 mt-5 w-96'>
       {getUserData()

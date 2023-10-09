@@ -11,7 +11,7 @@ import 'remixicon/fonts/remixicon.css'
 function App() {
 
   const { loader } = useSelector(state => state.loader)
-  console.log(loader);
+  // console.log(loader);
 
   return (
     <div>

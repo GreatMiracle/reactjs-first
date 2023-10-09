@@ -7,19 +7,45 @@ import moment from "moment"
 import { clearChatMessageApi } from '../../../services/chatService';
 import { SetAllChats } from '../../../redux/chatSlice';
 
-function ChatArea() {
+function ChatArea({ socket }) {
 
     const { allChats, selectChat } = useSelector((state) => state.chatReducer);
     const { user } = useSelector((state) => state.userReducer);
     const messageInputRef = useRef(null);
-    const [newMessage, SetNewMessage] = useState("");
-    const [message = [], SetMessage] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
+    const [message, setMessage] = useState([]);
     const dispatch = useDispatch();
+    const receipentUserId = selectChat?.members.find((m) => m._id !== user._id);
+    // console.log("user", user);
+    // console.log("receipentUserId", receipentUserId);
+    // console.log("selectChat", selectChat);
 
     useEffect(() => {
         fetchAllMessages();
         clearUnreadMessage();
-    }, [selectChat])
+
+        if (selectChat) {
+            //receive message from server using socker
+            socket.on("received-msg", (msg) => {
+                console.log("messagePrev-BEFORE", msg);
+                setMessage((prev) => [...prev, msg])
+                console.log("messagePrev- AFTER", message);
+
+            })
+        }
+
+    }, [selectChat]);
+
+    useEffect(() => {
+        if (message) {
+            const messageContainer = document.getElementById("lastMessageId");
+            if (messageContainer) {
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+
+        }
+
+    }, [message]);
 
     const fetchAllMessages = async () => {
         try {
@@ -28,18 +54,16 @@ function ChatArea() {
             dispatch(HideLoader());
             // console.log("responseAllM", response);
             if (response.success) {
-                SetMessage(response.data);
+                console.log("response.data", response.data);
+                setMessage(response.data);
+                console.log("response.data message", message);
+
             }
         } catch (error) {
             dispatch(HideLoader());
             toast.error(error.message)
         }
     };
-
-    const receipentUserId = selectChat?.members.find((m) => m._id !== user._id);
-    // console.log("user", user);
-    // console.log("receipentUserId", receipentUserId);
-    // console.log("selectChat", selectChat);
 
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
@@ -58,12 +82,26 @@ function ChatArea() {
                 text: newMessage,
             }
 
+            //send message to server using soket
+            console.log("message kien", message);
+            console.log("selectChat kien", selectChat);
+            console.log("selectChat message", message);
+
+            socket.emit("send-msg", {
+                ...messageSend,
+                members: selectChat.members.map((m) => m._id),
+                createdAt: moment().format("DD-MM-YYYY hh:mm:ss"),
+                read: false
+            })
+
+            //store message in db
             const response = await createNewMessage(messageSend);
             dispatch(HideLoader());
-            console.log(response);
+            // console.log(response);
             if (response.success) {
                 // Xóa nội dung tin nhắn trong input và tập trung vào ô input
-                SetNewMessage('');
+                setNewMessage('');
+                // fetchAllMessages();
                 messageInputRef.current.focus();
             }
         } catch (error) {
@@ -75,9 +113,9 @@ function ChatArea() {
     const clearUnreadMessage = async () => {
         try {
             dispatch(ShowLoader());
-            console.log("-------------------clearUnreadMessage--------------");
+            // console.log("-------------------clearUnreadMessage--------------");
             const response = await clearChatMessageApi(selectChat?._id);
-            console.log(" clearUnreadMessage response", response);
+            // console.log(" clearUnreadMessage response", response);
             dispatch(HideLoader());
 
             if (response.success) {
@@ -88,7 +126,7 @@ function ChatArea() {
                     return chat;
                 });
                 dispatch(SetAllChats(updateChats));
-                console.log("updateChats", allChats);
+                // console.log("updateChats", allChats);
             }
         } catch (error) {
             dispatch(HideLoader());
@@ -124,56 +162,58 @@ function ChatArea() {
 
                         {/* -------------------------------------------MESSAGE--------------------------------- */}
 
-                        <div className='h-[60vh] overflow-y-scroll p-5'>
-                            <div className='flex flex-col gap-2 '>
-                                {message?.map((msg) => {
-                                    const isCurrentUserSendText = msg.sender === user._id;
+                        <div className='h-[60vh] overflow-y-scroll p-5'
+                            id="lastMessageId">
+                            <div className='flex flex-col gap-2 ' >
+                                {
+                                    // console.log("message_Vuwowngj", message)
+                                    message?.map((msg) => {
+                                        const isCurrentUserSendText = msg.sender === user._id;
 
-                                    return (
-                                        <div
-                                            key={msg._id}
-                                            className={`flex ${isCurrentUserSendText && "justify-end"}`}>
-                                            <div className='flex flex-col gap-0'>
+                                        return (
+                                            <div
+                                                key={msg._id}
+                                                className={`flex ${isCurrentUserSendText && "justify-end"}`}>
+                                                <div className='flex flex-col gap-0'>
 
-                                                <h1 className={`
-                                                        ${isCurrentUserSendText ?
-                                                        "bg-primary text-white rounded-bl-none"
-                                                        : "bg-gray-200 text-primary rounded-tr-none"
-                                                    } p-2 rounded-xl 
-                                                    `}
-                                                >{msg.text}</h1>
-                                                <h1 className='text-gray-500 text-sm'>{
-                                                    moment(msg.createdAt).format("hh:mm A")
-                                                }</h1>
-                                            </div>
-                                            {
-                                                !isCurrentUserSendText &&
-                                                <div className='flex flex-col top-10 justify-center items-center'>
-                                                    <i
-                                                        // className={`ri-check-double-line text-xl
-                                                        className={`ri-checkbox-circle-line text-sm
-                                                        ${msg.read
-                                                                ? "text-blue-500"
-                                                                : "text-gray-400"
-                                                            }`
-                                                        }></i>
-
+                                                    <h1 className={`
+                                                            ${isCurrentUserSendText ?
+                                                            "bg-primary text-white rounded-bl-none"
+                                                            : "bg-gray-200 text-primary rounded-tr-none"
+                                                        } p-2 rounded-xl
+                                                        `}
+                                                    >{msg.text}- {msg._id}</h1>
+                                                    <h1 className='text-gray-500 text-sm'>{
+                                                        moment(msg.createdAt).format("hh:mm A")
+                                                    }</h1>
                                                 </div>
-                                            }
+                                                {
+                                                    !isCurrentUserSendText &&
+                                                    <div className='flex flex-col top-10 justify-center items-center'>
+                                                        <i
+                                                            // className={`ri-check-double-line text-xl
+                                                            className={`ri-checkbox-circle-line text-sm
+                                                            ${msg.read
+                                                                    ? "text-blue-500"
+                                                                    : "text-gray-400"
+                                                                }`
+                                                            }></i>
+
+                                                    </div>
+                                                }
 
 
-                                        </div>
+                                            </div>
+                                        )
+                                    }
                                     )
-
-
-
-                                })}
+                                }
                             </div>
-                        </div>
+                        </div >
 
 
                         {/* ---------------INPUT------------------------------------- */}
-                        <div>
+                        < div >
                             <div className='h-12 rounded-xl flex justify-between flex-grow gap-2 ' >
                                 <input
 
@@ -183,7 +223,7 @@ function ChatArea() {
                                     className='flex-grow h-full rounded-xl border-gray-500 shadow border'
                                     value={newMessage}
                                     onKeyDown={(e) => handleKeyDown(e)}
-                                    onChange={(e) => SetNewMessage(e.target.value)}
+                                    onChange={(e) => setNewMessage(e.target.value)}
                                 />
                                 <button
                                     className='bg-primary text-white p-2 rounded py-1 px-5'
@@ -194,14 +234,15 @@ function ChatArea() {
                                 </button>
                             </div>
 
-                        </div>
-                    </div>
+                        </div >
+                    </div >
                 ) : (
-                    <div className="flex flex-col justify-center items-center text-center">
+                    <div className="relative flex flex-col justify-center items-center text-center top-1/3">
                         <h1 className='text-4xl'>Welcome</h1>
                         <p className='text-2xl'>Ready? Set. Chat! Let's jump right into things.</p>
                     </div>
-                )}
+                )
+                }
             </div >
 
 
