@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { createNewChatApi, getDetailChatApi } from '../../../services/chatService';
 import { SetAllChats, SetSelectChat } from '../../../redux/chatSlice';
 import { HideLoader, ShowLoader } from '../../../redux/loaderSlice';
 import TruncateText from '../../../common/truncateText';
 import moment from 'moment';
+import store from '../../../redux/store';
 
 
 // const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'amber', 'lime', 'sky'];
@@ -24,7 +25,7 @@ function getRandomColor() {
 }
 
 
-function UserList({ searchKey }) {
+function UserList({ searchKey, socket }) {
 
   const dispatch = useDispatch();
   const { allUsers, user } = useSelector(state => state.userReducer);
@@ -64,21 +65,35 @@ function UserList({ searchKey }) {
   const openChat = async (receipentUserId) => {
     // console.log("receipentUserId", receipentUserId);
     // console.log("allChats", allChats);
-    const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
-      .find((memC) => {
-        return (
-          memC.includes(user._id) && memC.includes(receipentUserId)
-        )
-      });
+    // const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
+    //   .find((memC) => {
+    //     return (
+    //       memC.includes(user._id) && memC.includes(receipentUserId)
+    //     )
+    //   });
 
     const chat1 = allChats.find((chat) => {
       return chat.members.map((m) => (m._id)).includes(receipentUserId)
     });
+    console.log("chat1", chat1);
+    console.log("selectChat1", selectChat);
 
     // console.log("chat1", chat1);
     // console.log("chat", chat);
     if (chat1) {
-      dispatch(SetSelectChat(chat1))
+
+      if (!selectChat) {
+        console.log("!!!!!!!!!!!!!!!!!!!!!");
+        dispatch(SetSelectChat(chat1))
+      } else {
+        console.log("====================");
+        if (selectChat?._id !== chat1._id) {
+          console.log("=========OK===========");
+          dispatch(SetSelectChat(chat1))
+        }
+      }
+
+
     } else {
       createNewChat(receipentUserId);
     }
@@ -92,14 +107,12 @@ function UserList({ searchKey }) {
   }
 
   const getLastMessage = (receipentUserId) => {
-
     const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
     if (!chaterWithCurrenUser) {
       return "";
     } else {
       // console.log("chaterWithCurrenUser.lastMessage2", chaterWithCurrenUser);
       if (chaterWithCurrenUser.lastMessage) {
-
         const personSendLastMsg = chaterWithCurrenUser.lastMessage.sender === user._id ? "You: " : "";
         // console.log("chaterWithCurrenUser.lastMessage.text", chaterWithCurrenUser.lastMessage.text);
 
@@ -115,7 +128,6 @@ function UserList({ searchKey }) {
               {moment(chaterWithCurrenUser.createdAt).format("hh:mm A")}
             </h1>
           </div>
-
         );
       } else {
         return "";
@@ -125,18 +137,66 @@ function UserList({ searchKey }) {
   }
 
   const getUnreadMessage = (receipentUserId) => {
-    const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
+    // const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
+    const chaterWithCurrenUser = allChats.map((chat) =>
+      chat.members.map((m) => (m._id)))
+      .find((memC) => {
+        return (
+          memC[0].includes(receipentUserId) && memC[1].includes(user._id)
+        )
+      });
+    // console.log("receipentUserId", receipentUserId);
+    // console.log("aaaaaaaaaaaaaaaaa", chaterWithCurrenUser);
     // console.log("chaterWithCurrenUser", chaterWithCurrenUser);
-    if (chaterWithCurrenUser && chaterWithCurrenUser.unreadMessages) {
+    if (chaterWithCurrenUser) {
+      console.log("allChats", allChats);
+
+      const abc = allChats.find((chat) => {
+        const members = chat.members.map((m) => m._id);
+
+        // Kiểm tra xem members có phải là mảng chứa 2 member id cụ thể và đúng thứ tự không
+        return (
+          members.length === 2 &&
+          members[0] === receipentUserId &&
+          members[1] === user._id
+        );
+      });
+
+      console.log("abc", abc);
       return (
         <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
-          {chaterWithCurrenUser.unreadMessages}
+          {abc?.unreadMessages}
 
         </div>
       )
+    } else {
+      return ""
     }
 
   }
+
+  useEffect(() => {
+
+    socket.on("received-msg", (msg) => {
+      const tempSelectedChat = store.getState().chatReducer.selectChat;
+      const tempAllChats = store.getState().chatReducer.allChats;
+
+      if (tempSelectedChat?._id !== msg.chat) {
+        const updatedAllChats = tempAllChats.map((chat) => {
+          if (chat._id === msg.chat) {
+            return {
+              ...chat,
+              unreadMessages: (chat?.unreadMessages || 0) + 1,
+              lastMessage: msg
+            }
+          }
+          return chat;
+        });
+        dispatch(SetAllChats(updatedAllChats));
+      }
+    })
+  }, [])
+
 
   // console.log("getUserData", getUserData());
   // console.log("allChats", allChats);
@@ -208,6 +268,21 @@ function UserList({ searchKey }) {
     return allChats.find((chat) => {
       return chat.members.map((m) => (m._id)).includes(receipentUserId);
     });
+
+
+    // const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
+    //   .find((memC) => {
+    //     return (
+    //       memC[1].includes(user._id) && memC[2].includes(receipentUserId)
+    //     )
+    //   });
+
+    // if (chat) {
+    //   return true
+    // } else {
+    //   return false
+    // }
+
   }
 }
 

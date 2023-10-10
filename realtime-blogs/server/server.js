@@ -39,10 +39,18 @@ io.on('connection', (socket) => {
 
     //send message to clients (who are present in members array)
     socket.on('send-msg', (message) => {
-        console.log(message);
+        console.log('send-msg', message);
         io.to(message.members[0])
             .to(message.members[1])
             .emit("received-msg", message)
+    });
+
+    //clear-unread-message
+    socket.on('clear-unread-message', (message) => {
+        console.log('clear-unread-message', message);
+        io.to(message.members[0])
+            .to(message.members[1])
+            .emit("unread-message-cleared", message)
     });
 
 });

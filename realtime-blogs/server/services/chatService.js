@@ -5,6 +5,7 @@ const Message = require("../models/messageModel");
 const createNewChatService = async (req, res) => {
     console.log("--------------------------------------CREATE NEW CHAT--------------------------------------------------");
     try {
+        console.log("Chat(req.body)", req.body);
         const createChat = new Chat(req.body);
         const saveChat = await createChat.save();
 
@@ -92,7 +93,7 @@ const unreadMessageChatService = async (req, res) => {
             .populate("members")
             .populate("lastMessage");
 
-        const a = await Message.updateMany(
+        await Message.updateMany(
             {
                 chat: req.body.chat,
                 read: false
