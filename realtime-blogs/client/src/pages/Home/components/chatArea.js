@@ -26,13 +26,12 @@ function ChatArea({ socket }) {
 
         if (selectChat) {
 
-
             // Xóa các sự kiện socket cũ trước khi thêm sự kiện mới
             socket.off("received-msg");
             socket.off("unread-message-cleared");
 
             fetchAllMessages();
-            // clearUnreadMessage();
+            clearUnreadMessage();
 
             console.log("selectChatselectChatselectChat", selectChat);
             //receive message from server using socker
@@ -176,11 +175,11 @@ function ChatArea({ socket }) {
             //     members: selectChat.members.map((mem) => mem._id)
             // })
 
-            dispatch(ShowLoader());
+            // dispatch(ShowLoader());
             // console.log("-------------------clearUnreadMessage--------------");
             const response = await clearChatMessageApi(selectChat?._id);
             // console.log(" clearUnreadMessage response", response);
-            dispatch(HideLoader());
+            // dispatch(HideLoader());
 
             if (response.success) {
                 const updateChats = allChats.map((chat) => {
@@ -196,7 +195,7 @@ function ChatArea({ socket }) {
                 // console.log("updateChats", allChats);
             }
         } catch (error) {
-            dispatch(HideLoader());
+            // dispatch(HideLoader());
             toast.error(error.message)
         }
     }

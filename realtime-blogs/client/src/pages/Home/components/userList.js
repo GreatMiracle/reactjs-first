@@ -132,7 +132,6 @@ function UserList({ searchKey, socket }) {
       } else {
         return "";
       }
-
     }
   }
 
@@ -145,15 +144,16 @@ function UserList({ searchKey, socket }) {
           memC[0].includes(receipentUserId) && memC[1].includes(user._id)
         )
       });
-    // console.log("receipentUserId", receipentUserId);
+    console.log("receipentUserId", receipentUserId);
+    console.log("user._id", user._id);
     // console.log("aaaaaaaaaaaaaaaaa", chaterWithCurrenUser);
-    // console.log("chaterWithCurrenUser", chaterWithCurrenUser);
+    console.log("allChats", allChats);
+    console.log("chaterWithCurrenUser", chaterWithCurrenUser);
     if (chaterWithCurrenUser) {
       console.log("allChats", allChats);
 
       const abc = allChats.find((chat) => {
         const members = chat.members.map((m) => m._id);
-
         // Kiểm tra xem members có phải là mảng chứa 2 member id cụ thể và đúng thứ tự không
         return (
           members.length === 2 &&
@@ -162,13 +162,16 @@ function UserList({ searchKey, socket }) {
         );
       });
 
-      console.log("abc", abc);
-      return (
-        <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
-          {abc?.unreadMessages}
-
-        </div>
-      )
+      console.log("abc?.unreadMessages", abc?.unreadMessages);
+      if (abc?.unreadMessages > 0) {
+        return (
+          <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+            {abc?.unreadMessages}
+          </div>
+        )
+      } else {
+        return ""
+      }
     } else {
       return ""
     }
@@ -268,21 +271,6 @@ function UserList({ searchKey, socket }) {
     return allChats.find((chat) => {
       return chat.members.map((m) => (m._id)).includes(receipentUserId);
     });
-
-
-    // const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
-    //   .find((memC) => {
-    //     return (
-    //       memC[1].includes(user._id) && memC[2].includes(receipentUserId)
-    //     )
-    //   });
-
-    // if (chat) {
-    //   return true
-    // } else {
-    //   return false
-    // }
-
   }
 }
 
