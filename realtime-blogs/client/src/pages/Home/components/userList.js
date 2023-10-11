@@ -24,7 +24,7 @@ function getRandomColor() {
   return colors[randomIndex];
 }
 
-function UserList({ searchKey, socket }) {
+function UserList({ searchKey, socket, onlineUsers }) {
 
   const dispatch = useDispatch();
   const { allUsers, user } = useSelector(state => state.userReducer);
@@ -234,11 +234,13 @@ function UserList({ searchKey, socket }) {
     });
   }, [])
 
+  console.log("onlineUsers", onlineUsers);
+
   // console.log("getUserData", getUserData());
   // console.log("allChats", allChats);
   return (
     // <div className='flex flex-col gap-3 mt-5 lg:w-96 md:w-60 sm:w-60'>
-      <div className='flex flex-col gap-3 mt-5 w-96'>
+    <div className='flex flex-col gap-3 mt-5 w-96'>
       {getUserData()
         .map((userItem) => {
 
@@ -259,8 +261,14 @@ function UserList({ searchKey, socket }) {
                 )}
                 {!userItem.profilePic && (
                   <div
-                    className={`${getRandomColor()} text-white rounded-full w-10 h-10 flex items-center justify-center mx-1`} >
+                    className={`${getRandomColor()} text-white rounded-full w-10 h-10 flex items-center justify-center mx-1 relative`} >
                     <h1 className='uppercase text-4xl font-semibold'>{userItem.name[0]} </h1>
+
+                    {onlineUsers.includes(userItem._id) && (
+                      <div >
+                        <div className='bg-green-500 h-3 w-3 rounded-full absolute bottom-[3px] right-0'></div>
+                      </div>
+                    )}
                   </div>
                 )}
 

@@ -13,8 +13,16 @@ function Home() {
 
   const [searchKey, setSearchKey] = useState("");
   const { user } = useSelector((state) => state.userReducer);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+
   useEffect(() => {
     socket.emit("join-room", user._id);
+    socket.emit("came-online", user._id);
+
+    socket.on("online-users", (users) => {
+      setOnlineUsers(users)
+    })
   }, [user])
 
   // useEffect(() => {
@@ -39,6 +47,7 @@ function Home() {
         <UserList
           searchKey={searchKey}
           socket={socket}
+          onlineUsers={onlineUsers}
         />
       </div>
 

@@ -61,6 +61,17 @@ io.on('connection', (socket) => {
             .emit("started-typing", message)
     });
 
+    //online user
+    let onlineUsers = [];
+    socket.on('came-online', (userId) => {
+        console.log('came-online', userId);
+        if (!onlineUsers.includes(userId)) {
+            onlineUsers.push(userId);
+        }
+        io.emit("online-users", onlineUsers)
+        console.log('onlineUsers', onlineUsers);
+    });
+
 
 });
 
