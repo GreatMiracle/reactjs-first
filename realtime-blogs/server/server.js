@@ -53,6 +53,15 @@ io.on('connection', (socket) => {
             .emit("unread-message-cleared", message)
     });
 
+    //typing
+    socket.on('typing', (message) => {
+        console.log('typing', message);
+        io.to(message.members[0])
+            .to(message.members[1])
+            .emit("started-typing", message)
+    });
+
+
 });
 
 

@@ -16,15 +16,22 @@ function ChatArea({ socket }) {
     const [newMessage, setNewMessage] = useState("");
     const [message, setMessage] = useState([]);
     const dispatch = useDispatch();
+
+    const [isReceipentTyping, setIsReceipentTyping] = useState(false);
+
+
+
     const receipentUserId = selectChat?.members.find((m) => m._id !== user._id);
 
     useEffect(() => {
 
         if (selectChat) {
+            setNewMessage('');
 
             // Xóa các sự kiện socket cũ trước khi thêm sự kiện mới
             socket.off("received-msg");
             socket.off("unread-message-cleared");
+            socket.off("started-typing");
 
             fetchAllMessages();
             clearUnreadMessage();
@@ -34,7 +41,6 @@ function ChatArea({ socket }) {
             socket.on("received-msg", (msg) => {
                 console.log("socket-received-message-BEFORE", msg);
                 const tempSelectChat = store.getState().chatReducer.selectChat;
-
 
                 if (tempSelectChat._id === msg.chat) {
                     setMessage((mess) => [...mess, msg])
@@ -78,7 +84,22 @@ function ChatArea({ socket }) {
                     });
                 }
             });
-        }
+
+            socket.on("started-typing", (data) => {
+                console.log("started-typing", data);
+                const tempSelectChat = store.getState().chatReducer.selectChat;
+
+                if (data.chat === tempSelectChat._id && data.sender !== user._id) {
+
+                    setIsReceipentTyping(true)
+                }
+
+                setTimeout(() => {
+                    setIsReceipentTyping(false);
+                }, 3000);
+
+            });
+        };
 
     }, [selectChat]);
 
@@ -86,10 +107,10 @@ function ChatArea({ socket }) {
         if (message) {
             const messageContainer = document.getElementById("lastMessageId");
             if (messageContainer) {
-                messageContainer.scrollTop = messageContainer.scrollHeight;
+                messageContainer.scrollTop = messageContainer.scrollHeight + 100;
             }
         }
-    }, [message]);
+    }, [message, isReceipentTyping]);
 
     const fetchAllMessages = async () => {
         try {
@@ -130,19 +151,18 @@ function ChatArea({ socket }) {
             console.log("selectChat kien", selectChat);
             console.log("selectChat message", message);
 
-            socket.emit("send-msg", {
-                ...messageSend,
-                members: selectChat.members.map((m) => m._id),
-                createdAt: moment().format("DD-MM-YYYY hh:mm:ss"),
-                read: false
-            })
+            // socket.emit("send-msg", {
+            //     ...messageSend,
+            //     members: selectChat.members.map((m) => m._id),
+            //     createdAt: moment().format("DD-MM-YYYY hh:mm:ss"),
+            //     read: false
+            // })
 
             //store message in db
             const response = await createNewMessage(messageSend);
             dispatch(HideLoader());
             // console.log(response);
             if (response.success) {
-                console.log("response response response response data", response);
                 socket.emit("send-msg", {
                     ...response.data,
                     members: selectChat.members.map((m) => m._id),
@@ -271,6 +291,19 @@ function ChatArea({ socket }) {
                                         )
                                     }
                                     )
+
+
+                                }
+
+                                {
+                                    isReceipentTyping && (
+                                        <div className='pb-10'>
+                                            <h1 className='bg-gray-300 text-gray-500 p-2 rounded-xl w-max'>
+                                                typing...
+                                            </h1>
+                                        </div>
+
+                                    )
                                 }
                             </div>
                         </div >
@@ -294,7 +327,20 @@ function ChatArea({ socket }) {
                                         } else {
                                             setIsButtonDisabled(true); // Vô hiệu hóa nút khi trống nội dung
                                             setNewMessage("");
+                                        };
+                                        // console.log("selectChat", selectChat);
+                                        const messageContainer = document.getElementById("lastMessageId");
+                                        if (messageContainer) {
+                                            messageContainer.scrollTop = messageContainer.scrollHeight + 100;
                                         }
+                                        socket.emit("typing", {
+                                            chat: selectChat._id,
+                                            members: selectChat.members.map((mem) => mem._id),
+                                            sender: user._id
+                                        });
+
+
+
                                     }
                                     }
 

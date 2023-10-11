@@ -24,7 +24,6 @@ function getRandomColor() {
   return colors[randomIndex];
 }
 
-
 function UserList({ searchKey, socket }) {
 
   const dispatch = useDispatch();
@@ -72,7 +71,7 @@ function UserList({ searchKey, socket }) {
       const newChatId = response.data._id;
 
       const newChat = await getDetailChatApi(newChatId);
-      console.log("newChat.datanewChat.datanewChat.data", newChat.data);
+      // console.log("newChat.datanewChat.datanewChat.data", newChat.data);
       const updateChats = [...allChats, newChat.data];
       dispatch(SetAllChats(updateChats));
       dispatch(SetSelectChat(newChat.data));
@@ -151,10 +150,10 @@ function UserList({ searchKey, socket }) {
           memC.includes(receipentUserId) && memC.includes(user._id)
         )
       });
-    console.log("receipentUserId", receipentUserId);
-    console.log("user._id", user._id);
-    console.log("allChats", allChats);
-    console.log("chaterWithCurrenUser", chaterWithCurrenUser);
+    // console.log("receipentUserId", receipentUserId);
+    // console.log("user._id", user._id);
+    // console.log("allChats", allChats);
+    // console.log("chaterWithCurrenUser", chaterWithCurrenUser);
     if (chaterWithCurrenUser) {
       // console.log("allChats", allChats);
 
@@ -198,31 +197,48 @@ function UserList({ searchKey, socket }) {
   }
 
   useEffect(() => {
-    socket.off("received-msg");
+    // socket.off("received-msg");
     socket.on("received-msg", (msg) => {
       const tempSelectedChat = store.getState().chatReducer.selectChat;
       const tempAllChats = store.getState().chatReducer.allChats;
-
+      // console.log("===============tempSelectedChat======", tempSelectedChat);
+      // console.log("===============tempAllChats======", tempAllChats);
+      // console.log("===============msg======", msg);
       if (tempSelectedChat?._id !== msg.chat) {
         const updatedAllChats = tempAllChats.map((chat) => {
           if (chat._id === msg.chat) {
-            return {
-              ...chat,
-              unreadMessages: (chat?.unreadMessages || 0) + 1,
-              lastMessage: msg
+            const senderOrReceipent = msg.members[0] === user._id;
+            // console.log("senderOrReceipent", senderOrReceipent);
+            if (senderOrReceipent) {
+              // console.log("<<<<<<<<<<<<<<<<<<<ddaay laf nguwoif guirw ");
+              return {
+                ...chat,
+                unreadMessagesRecipient: (chat?.unreadMessagesRecipient || 0) + 1,
+                lastMessage: msg
+              }
+            }
+            else {
+              // console.log("<<<<<<<<<<<<<<<<<<<receipent ");
+              return {
+                ...chat,
+                unreadMessagesSender: (chat?.unreadMessagesSender || 0) + 1,
+                lastMessage: msg
+              }
             }
           }
+          // console.log("received-msg..........received-msg..............", chat);
           return chat;
         });
         dispatch(SetAllChats(updatedAllChats));
       }
-    })
+    });
   }, [])
 
   // console.log("getUserData", getUserData());
   // console.log("allChats", allChats);
   return (
-    <div className='flex flex-col gap-3 mt-5 w-96'>
+    // <div className='flex flex-col gap-3 mt-5 lg:w-96 md:w-60 sm:w-60'>
+      <div className='flex flex-col gap-3 mt-5 w-96'>
       {getUserData()
         .map((userItem) => {
 
