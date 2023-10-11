@@ -14,7 +14,15 @@ const chatSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "messages",
         },
-        unreadMessages: {
+        unreadMessages: { //sender corresponding with member[0] - human start conversation
+            type: Number,
+            default: 0,
+        },
+        unreadMessagesSender: { //sender corresponding with member[0] - human start conversation
+            type: Number,
+            default: 0,
+        },
+        unreadMessagesRecipient: {  //recipient corresponding with member[1]
             type: Number,
             default: 0,
         }
@@ -22,7 +30,7 @@ const chatSchema = new mongoose.Schema(
     {
         timestamps: true,
     }
-) 
+)
 const Chat = mongoose.model('chats', chatSchema);
 
 module.exports = Chat;

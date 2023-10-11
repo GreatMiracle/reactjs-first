@@ -6,7 +6,7 @@ import { HideLoader, ShowLoader } from '../../../redux/loaderSlice';
 import TruncateText from '../../../common/truncateText';
 import moment from 'moment';
 import store from '../../../redux/store';
-
+import toast from 'react-hot-toast';
 
 // const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'amber', 'lime', 'sky'];
 // function getRandomColor() {
@@ -50,12 +50,29 @@ function UserList({ searchKey, socket }) {
 
   const createNewChat = async (receipentUserId) => {
     dispatch(ShowLoader());
+    if (allChats.length > 0) {
+      const conversation = allChats.find((chat) => {
+        const members = chat.members.map((m) => m._id);
+        // Kiểm tra xem members có phải là mảng chứa 2 member id cụ thể và đúng thứ tự không
+        return (
+          members.length === 2 &&
+          members.includes(receipentUserId) &&
+          members.includes(user._id)
+        );
+      });
+
+      if (conversation) {
+        toast.error("Reload page again please!");
+      }
+    }
+
     const response = await createNewChatApi([user._id, receipentUserId]);
     dispatch(HideLoader());
     if (response.success) {
       const newChatId = response.data._id;
 
       const newChat = await getDetailChatApi(newChatId);
+      console.log("newChat.datanewChat.datanewChat.data", newChat.data);
       const updateChats = [...allChats, newChat.data];
       dispatch(SetAllChats(updateChats));
       dispatch(SetSelectChat(newChat.data));
@@ -63,37 +80,24 @@ function UserList({ searchKey, socket }) {
   }
 
   const openChat = async (receipentUserId) => {
-    // console.log("receipentUserId", receipentUserId);
-    // console.log("allChats", allChats);
-    // const chat = allChats.map((chat) => chat.members.map((m) => (m._id)))
-    //   .find((memC) => {
-    //     return (
-    //       memC.includes(user._id) && memC.includes(receipentUserId)
-    //     )
-    //   });
-
     const chat1 = allChats.find((chat) => {
       return chat.members.map((m) => (m._id)).includes(receipentUserId)
     });
-    console.log("chat1", chat1);
-    console.log("selectChat1", selectChat);
-
     // console.log("chat1", chat1);
-    // console.log("chat", chat);
+    // console.log("selectChat1", selectChat);
+
     if (chat1) {
 
       if (!selectChat) {
-        console.log("!!!!!!!!!!!!!!!!!!!!!");
+        // console.log("!!!!!!!!!!!!!!!!!!!!!");
         dispatch(SetSelectChat(chat1))
       } else {
-        console.log("====================");
+        // console.log("====================");
         if (selectChat?._id !== chat1._id) {
-          console.log("=========OK===========");
+          // console.log("=========OK===========");
           dispatch(SetSelectChat(chat1))
         }
       }
-
-
     } else {
       createNewChat(receipentUserId);
     }
@@ -137,49 +141,64 @@ function UserList({ searchKey, socket }) {
 
   const getUnreadMessage = (receipentUserId) => {
     // const chaterWithCurrenUser = hasChatWithReceipent(receipentUserId);
-    const chaterWithCurrenUser = allChats.map((chat) =>
+    if (allChats.length < 1) {
+      return <div></div>
+    }
+    const chaterWithCurrenUser = allChats?.map((chat) =>
       chat.members.map((m) => (m._id)))
       .find((memC) => {
         return (
-          memC[0].includes(receipentUserId) && memC[1].includes(user._id)
+          memC.includes(receipentUserId) && memC.includes(user._id)
         )
       });
     console.log("receipentUserId", receipentUserId);
     console.log("user._id", user._id);
-    // console.log("aaaaaaaaaaaaaaaaa", chaterWithCurrenUser);
     console.log("allChats", allChats);
     console.log("chaterWithCurrenUser", chaterWithCurrenUser);
     if (chaterWithCurrenUser) {
-      console.log("allChats", allChats);
+      // console.log("allChats", allChats);
 
-      const abc = allChats.find((chat) => {
+      const conversation = allChats.find((chat) => {
         const members = chat.members.map((m) => m._id);
         // Kiểm tra xem members có phải là mảng chứa 2 member id cụ thể và đúng thứ tự không
         return (
           members.length === 2 &&
-          members[0] === receipentUserId &&
-          members[1] === user._id
+          members.includes(receipentUserId) &&
+          members.includes(user._id)
         );
       });
+      // console.log("abc?.unreadMessages", conversation);
+      // console.log("abc?.unreadMessages", conversation?.unreadMessages);
 
-      console.log("abc?.unreadMessages", abc?.unreadMessages);
-      if (abc?.unreadMessages > 0) {
-        return (
-          <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
-            {abc?.unreadMessages}
-          </div>
-        )
+      if (chaterWithCurrenUser[1] === user._id) {
+        if (conversation?.unreadMessagesRecipient > 0) {
+          return (
+            <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+              {conversation?.unreadMessagesRecipient}
+            </div>
+          )
+        } else {
+          return <div></div>
+        }
       } else {
-        return ""
+
+        if (conversation?.unreadMessagesSender > 0) {
+          return (
+            <div className='bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center'>
+              {conversation?.unreadMessagesSender}
+            </div>
+          )
+        } else {
+          return <div></div>
+        }
       }
     } else {
-      return ""
+      return <div></div>
     }
-
   }
 
   useEffect(() => {
-
+    socket.off("received-msg");
     socket.on("received-msg", (msg) => {
       const tempSelectedChat = store.getState().chatReducer.selectChat;
       const tempAllChats = store.getState().chatReducer.allChats;
@@ -199,7 +218,6 @@ function UserList({ searchKey, socket }) {
       }
     })
   }, [])
-
 
   // console.log("getUserData", getUserData());
   // console.log("allChats", allChats);
@@ -259,11 +277,8 @@ function UserList({ searchKey, socket }) {
                   </button>
                 )
               }
-
-
             </div>)
         })}
-
     </div >
   )
 

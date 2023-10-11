@@ -9,18 +9,14 @@ import { SetAllChats } from '../../../redux/chatSlice';
 import store from '../../../redux/store';
 
 function ChatArea({ socket }) {
-
+    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
     const { allChats, selectChat } = useSelector((state) => state.chatReducer);
     const { user } = useSelector((state) => state.userReducer);
     const messageInputRef = useRef(null);
     const [newMessage, setNewMessage] = useState("");
     const [message, setMessage] = useState([]);
     const dispatch = useDispatch();
-    const [msgReceived, setMsgReceived] = useState("");
     const receipentUserId = selectChat?.members.find((m) => m._id !== user._id);
-    // console.log("user", user);
-    // console.log("receipentUserId", receipentUserId);
-    // console.log("selectChat", selectChat);
 
     useEffect(() => {
 
@@ -122,7 +118,7 @@ function ChatArea({ socket }) {
 
     const handleSendMessage = async () => {
         try {
-            // dispatch(ShowLoader());
+            dispatch(ShowLoader());
             const messageSend = {
                 chat: selectChat._id,
                 sender: user._id,
@@ -134,16 +130,16 @@ function ChatArea({ socket }) {
             console.log("selectChat kien", selectChat);
             console.log("selectChat message", message);
 
-            // socket.emit("send-msg", {
-            //     ...messageSend,
-            //     members: selectChat.members.map((m) => m._id),
-            //     createdAt: moment().format("DD-MM-YYYY hh:mm:ss"),
-            //     read: false
-            // })
+            socket.emit("send-msg", {
+                ...messageSend,
+                members: selectChat.members.map((m) => m._id),
+                createdAt: moment().format("DD-MM-YYYY hh:mm:ss"),
+                read: false
+            })
 
             //store message in db
             const response = await createNewMessage(messageSend);
-            // dispatch(HideLoader());
+            dispatch(HideLoader());
             // console.log(response);
             if (response.success) {
                 console.log("response response response response data", response);
@@ -155,12 +151,14 @@ function ChatArea({ socket }) {
                 })
 
                 // Xóa nội dung tin nhắn trong input và tập trung vào ô input
+                setIsButtonDisabled(true)
                 setNewMessage('');
+
                 // fetchAllMessages();
                 messageInputRef.current.focus();
             }
         } catch (error) {
-            // dispatch(HideLoader());
+            dispatch(HideLoader());
             toast.error(error.message)
         }
     };
@@ -289,15 +287,41 @@ function ChatArea({ socket }) {
                                     className='flex-grow h-full rounded-xl border-gray-500 shadow border'
                                     value={newMessage}
                                     onKeyDown={(e) => handleKeyDown(e)}
-                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onChange={(e) => {
+                                        if (e.target.value.trim() !== "") {
+                                            setNewMessage(e.target.value);
+                                            setIsButtonDisabled(false); // Bỏ vô hiệu hóa nút khi có nội dung
+                                        } else {
+                                            setIsButtonDisabled(true); // Vô hiệu hóa nút khi trống nội dung
+                                            setNewMessage("");
+                                        }
+                                    }
+                                    }
+
                                 />
-                                <button
-                                    className='bg-primary text-white p-2 rounded py-1 px-5'
-                                    onClick={handleSendMessage}
-                                >
-                                    <i className="ri-send-plane-2-line text-2xl text-white"></i>
-                                    {/* SEND */}
-                                </button>
+                                {
+                                    isButtonDisabled === false ? (
+                                        <button
+                                            className='bg-primary text-white p-2 rounded py-1 px-5'
+
+                                            disabled={isButtonDisabled}
+                                            onClick={handleSendMessage}
+                                        >
+                                            <i className="ri-send-plane-2-line text-2xl text-white"></i>
+                                            {/* SEND */}
+                                        </button>
+                                    ) :
+                                        (<button
+                                            className='bg-gray-500 text-white p-2 rounded py-1 px-5'
+
+                                            disabled={isButtonDisabled}
+                                            onClick={handleSendMessage}
+                                        >
+                                            <i className="ri-send-plane-2-line text-2xl text-white"></i>
+                                            {/* SEND */}
+                                        </button>)
+                                }
+
                             </div>
 
                         </div >
