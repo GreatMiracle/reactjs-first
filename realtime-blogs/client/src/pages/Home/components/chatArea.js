@@ -23,7 +23,7 @@ function ChatArea({ socket }) {
 
     const [isReceipentTyping, setIsReceipentTyping] = useState(false);
 
-
+    const [image, setImage] = useState("");
 
     const receipentUserId = selectChat?.members.find((m) => m._id !== user._id);
 
@@ -147,10 +147,12 @@ function ChatArea({ socket }) {
     const handleSendMessage = async () => {
         try {
             dispatch(ShowLoader());
+            console.log("image===========>", image);
             const messageSend = {
                 chat: selectChat._id,
                 sender: user._id,
                 text: newMessage,
+                image: image ? image : ""
             }
 
             //send message to server using soket
@@ -227,6 +229,20 @@ function ChatArea({ socket }) {
     }
     console.log("message", message);
 
+    const onSendImage = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader(file);
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            console.log("Image>>>>>>>>", reader.result);
+            setImage(reader.result);
+            // handleSendMessage(reader.result)
+
+        }
+        console.log("file", file);
+    }
+    console.log("image=1==========>", image);
+
     return (
         <>
             {/* ------------------------------------------------HEADER-----------------------------------         */}
@@ -270,6 +286,13 @@ function ChatArea({ socket }) {
                                                         } p-2 rounded-xl
                                                         `}
                                                     >{msg.text}</h1>
+                                                    {msg.image && (
+                                                        <img
+                                                            src={msg.image}
+                                                            alt=""
+                                                            className="w-24 h-24 rounded-xl"
+                                                        />
+                                                    )}
                                                     <h1 className='text-gray-500 text-sm'>{
                                                         // moment(msg.createdAt).format("hh:mm A")
                                                         getDateInRegualarFormat(msg.createdAt)
@@ -316,8 +339,27 @@ function ChatArea({ socket }) {
                                                 setShowEmojiPicker(false)
                                             }} />
                                     </div>}
-                                <i className="ri-emoji-sticker-line cursor-pointer text-3xl items-center justify-center"
-                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}></i>
+
+
+                                <div className='flex gap-2'>
+
+                                    <label for="file" >
+                                        <i class="ri-folder-image-line cursor-pointer text-3xl items-center justify-center"
+                                            typeof='file' />
+                                        <input type='file'
+                                            id='file'
+                                            style={{ display: 'none' }}
+                                            accept='image/gift,image/jpeg,image/png,image/jpg'
+                                            onChange={onSendImage}
+                                        >
+                                        </input>
+
+                                    </label>
+                                    <i className="ri-emoji-sticker-line cursor-pointer text-3xl items-center justify-center"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}></i>
+                                </div>
+
+
                                 <input
                                     ref={messageInputRef}
                                     type='text'

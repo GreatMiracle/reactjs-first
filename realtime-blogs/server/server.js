@@ -18,7 +18,10 @@ const routerChat = require('./routers/chatRouter');
 const routerMessage = require('./routers/messageRouter');
 
 const OnlineUsers = require('./services/onlineUser');
-app.use(express.json());
+// app.use(express.json());
+// Tăng giới hạn payload lên 10MB
+app.use(express.json({ limit: '50mb' }));
+// app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const httpServer = require("http").createServer(app);
 const io = require("socket.io")(httpServer, {
