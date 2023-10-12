@@ -7,6 +7,9 @@ import moment from "moment"
 import { clearChatMessageApi } from '../../../services/chatService';
 import { SetAllChats } from '../../../redux/chatSlice';
 import store from '../../../redux/store';
+import getDateInRegualarFormat from '../../../common/dateCommon';
+import EmojiPicker from 'emoji-picker-react';
+
 
 function ChatArea({ socket }) {
     const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -16,6 +19,7 @@ function ChatArea({ socket }) {
     const [newMessage, setNewMessage] = useState("");
     const [message, setMessage] = useState([]);
     const dispatch = useDispatch();
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     const [isReceipentTyping, setIsReceipentTyping] = useState(false);
 
@@ -29,16 +33,16 @@ function ChatArea({ socket }) {
             setNewMessage('');
 
             // Xóa các sự kiện socket cũ trước khi thêm sự kiện mới
-            socket.off("received-msg");
-            socket.off("unread-message-cleared");
-            socket.off("started-typing");
+            // socket.off("received-msg");
+            // socket.off("unread-message-cleared");
+            // socket.off("started-typing");
 
             fetchAllMessages();
             clearUnreadMessage();
 
             console.log("selectChatselectChatselectChat", selectChat);
             //receive message from server using socker
-            socket.on("received-msg", (msg) => {
+            socket.off("received-msg").on("received-msg", (msg) => {
                 console.log("socket-received-message-BEFORE", msg);
                 const tempSelectChat = store.getState().chatReducer.selectChat;
 
@@ -55,7 +59,7 @@ function ChatArea({ socket }) {
             });
 
             //clear unread message from server using socker
-            socket.on("unread-message-cleared", (data) => {
+            socket.off("unread-message-cleared").on("unread-message-cleared", (data) => {
                 console.log("socket-unMsg-BEFORE", data);
                 const tempSelectChat = store.getState().chatReducer.selectChat;
                 const tempAllChats = store.getState().chatReducer.allChats;
@@ -111,6 +115,9 @@ function ChatArea({ socket }) {
             }
         }
     }, [message, isReceipentTyping]);
+
+
+
 
     const fetchAllMessages = async () => {
         try {
@@ -173,6 +180,7 @@ function ChatArea({ socket }) {
                 // Xóa nội dung tin nhắn trong input và tập trung vào ô input
                 setIsButtonDisabled(true)
                 setNewMessage('');
+                setShowEmojiPicker(false)
 
                 // fetchAllMessages();
                 messageInputRef.current.focus();
@@ -217,13 +225,14 @@ function ChatArea({ socket }) {
             toast.error(error.message)
         }
     }
+    console.log("message", message);
 
     return (
         <>
             {/* ------------------------------------------------HEADER-----------------------------------         */}
             <div className='bg-white border rounded-2xl h-screen'>
                 {selectChat ? (
-                    <div className='h-[80vh] flex flex-col justify-between p-5'>
+                    <div className='h-[90vh] flex flex-col justify-between p-5'>
                         <div>
                             <div className='flex gap-5 items-center mb-2'>
                                 {receipentUserId.profilePic && (
@@ -238,7 +247,6 @@ function ChatArea({ socket }) {
                                         <h1 className='uppercase text-4xl font-semibold'>{receipentUserId.name[0]} </h1>
                                     </div>
                                 )}
-
                                 <h1 className='uppercase'>{receipentUserId.name}</h1>
                             </div>
                             <hr />
@@ -250,16 +258,11 @@ function ChatArea({ socket }) {
                             id="lastMessageId">
                             <div className='flex flex-col gap-2 ' >
                                 {
-                                    // console.log("message_Vuwowngj", message)
-                                    message?.map((msg) => {
+                                    message?.map((msg, index) => {
                                         const isCurrentUserSendText = msg.sender === user._id;
-
                                         return (
-                                            <div
-                                                key={msg._id}
-                                                className={`flex ${isCurrentUserSendText && "justify-end"}`}>
+                                            <div key={msg._id} className={`flex ${isCurrentUserSendText && "justify-end"}`}>
                                                 <div className='flex flex-col gap-0'>
-
                                                     <h1 className={`
                                                             ${isCurrentUserSendText ?
                                                             "bg-primary text-white rounded-bl-none"
@@ -268,52 +271,54 @@ function ChatArea({ socket }) {
                                                         `}
                                                     >{msg.text}</h1>
                                                     <h1 className='text-gray-500 text-sm'>{
-                                                        moment(msg.createdAt).format("hh:mm A")
+                                                        // moment(msg.createdAt).format("hh:mm A")
+                                                        getDateInRegualarFormat(msg.createdAt)
                                                     }</h1>
                                                 </div>
                                                 {
                                                     isCurrentUserSendText &&
                                                     <div className='flex flex-col top-10 justify-center items-center'>
                                                         <i
-                                                            // className={`ri-check-double-line text-xl
                                                             className={`ri-checkbox-circle-line text-sm
                                                             ${msg.read
                                                                     ? "text-blue-500"
                                                                     : "text-gray-400"
                                                                 }`
                                                             }></i>
-
                                                     </div>
                                                 }
-
-
                                             </div>
                                         )
-                                    }
-                                    )
-
-
+                                    })
                                 }
 
-                                {
-                                    isReceipentTyping && (
-                                        <div className='pb-10'>
-                                            <h1 className='bg-gray-300 text-gray-500 p-2 rounded-xl w-max'>
-                                                typing...
-                                            </h1>
-                                        </div>
-
-                                    )
-                                }
+                                {isReceipentTyping && (
+                                    <div className='pb-10'>
+                                        <h1 className='bg-gray-300 text-gray-500 p-2 rounded-xl w-max'>
+                                            typing...
+                                        </h1>
+                                    </div>
+                                )}
                             </div>
                         </div >
-
 
                         {/* ---------------INPUT------------------------------------- */}
                         < div >
                             <div className='h-12 rounded-xl flex justify-between flex-grow gap-2 ' >
+                                {showEmojiPicker &&
+                                    <div className='absolute bottom-5 left-20'>
+                                        {/* <div className='absolute top-96 left-20'> */}
+                                        <EmojiPicker
+                                            height={350}
+                                            onEmojiClick={(e) => {
+                                                setNewMessage(newMessage + " " + e.emoji)
+                                                setIsButtonDisabled(false)
+                                                setShowEmojiPicker(false)
+                                            }} />
+                                    </div>}
+                                <i className="ri-emoji-sticker-line cursor-pointer text-3xl items-center justify-center"
+                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}></i>
                                 <input
-
                                     ref={messageInputRef}
                                     type='text'
                                     placeholder="Type a message"
@@ -338,38 +343,27 @@ function ChatArea({ socket }) {
                                             members: selectChat.members.map((mem) => mem._id),
                                             sender: user._id
                                         });
-
-
-
-                                    }
-                                    }
-
+                                    }}
                                 />
-                                {
-                                    isButtonDisabled === false ? (
-                                        <button
-                                            className='bg-primary text-white p-2 rounded py-1 px-5'
-
-                                            disabled={isButtonDisabled}
-                                            onClick={handleSendMessage}
-                                        >
-                                            <i className="ri-send-plane-2-line text-2xl text-white"></i>
-                                            {/* SEND */}
-                                        </button>
+                                {isButtonDisabled === false ?
+                                    (<button
+                                        className='bg-primary text-white p-2 rounded py-1 px-5'
+                                        disabled={isButtonDisabled}
+                                        onClick={handleSendMessage}
+                                    >
+                                        <i className="ri-send-plane-2-line text-2xl text-white"></i>
+                                    </button>
                                     ) :
-                                        (<button
-                                            className='bg-gray-500 text-white p-2 rounded py-1 px-5'
-
-                                            disabled={isButtonDisabled}
-                                            onClick={handleSendMessage}
-                                        >
-                                            <i className="ri-send-plane-2-line text-2xl text-white"></i>
-                                            {/* SEND */}
-                                        </button>)
+                                    (<button
+                                        className='bg-gray-500 text-white p-2 rounded py-1 px-5'
+                                        disabled={isButtonDisabled}
+                                        onClick={handleSendMessage}
+                                    >
+                                        <i className="ri-send-plane-2-line text-2xl text-white"></i>
+                                    </button>
+                                    )
                                 }
-
                             </div>
-
                         </div >
                     </div >
                 ) : (
@@ -377,12 +371,8 @@ function ChatArea({ socket }) {
                         <h1 className='text-4xl'>Welcome</h1>
                         <p className='text-2xl'>Ready? Set. Chat! Let's jump right into things.</p>
                     </div>
-                )
-                }
+                )}
             </div >
-
-
-
         </>
     );
 }

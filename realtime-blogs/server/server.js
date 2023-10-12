@@ -16,6 +16,7 @@ const routerWebAuth = require('./routers/authRouter');
 const routerWebUser = require('./routers/userRouter');
 const routerChat = require('./routers/chatRouter');
 const routerMessage = require('./routers/messageRouter');
+const OnlineUsers = require('./services/onlineUser');
 app.use(express.json());
 
 const httpServer = require("http").createServer(app);
@@ -62,14 +63,13 @@ io.on('connection', (socket) => {
     });
 
     //online user
-    let onlineUsers = [];
+    // let onlineUsers = [];
     socket.on('came-online', (userId) => {
+        // console.log('onlineUsers start', onlineUsers);
         console.log('came-online', userId);
-        if (!onlineUsers.includes(userId)) {
-            onlineUsers.push(userId);
-        }
-        io.emit("online-users", onlineUsers)
-        console.log('onlineUsers', onlineUsers);
+        OnlineUsers.addOnlineUser(userId); // Thêm người dùng vào danh sách online
+        io.emit("online-users", OnlineUsers.getOnlineUsers());
+        console.log('user online', OnlineUsers.getOnlineUsers());
     });
 
 

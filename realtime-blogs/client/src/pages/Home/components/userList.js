@@ -7,6 +7,7 @@ import TruncateText from '../../../common/truncateText';
 import moment from 'moment';
 import store from '../../../redux/store';
 import toast from 'react-hot-toast';
+import getDateInRegualarFormat from '../../../common/dateCommon';
 
 // const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'amber', 'lime', 'sky'];
 // function getRandomColor() {
@@ -17,7 +18,7 @@ import toast from 'react-hot-toast';
 //   return `bg-${randomColor}-${roundedNumber}`;
 // }
 
-const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-lime-500'
+const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-700', 'bg-yellow-500', 'bg-purple-500', 'bg-lime-500'
   , 'bg-amber-500', 'bg-sky-500', 'bg-orange-500', 'bg-violet-500', 'bg-gray-500', 'bg-teal-500'];
 function getRandomColor() {
   const randomIndex = Math.floor(Math.random() * colors.length);
@@ -35,7 +36,7 @@ function UserList({ searchKey, socket, onlineUsers }) {
       .filter((u) => {
         return (
           u.name.toLowerCase().includes(searchKey.toLowerCase())
-          // && searchKey
+          && searchKey
         )
           || allChats.some((chat) => chat.members.map((mem) => mem._id).includes(u._id))
       })
@@ -128,7 +129,9 @@ function UserList({ searchKey, socket, onlineUsers }) {
               {`${personSendLastMsg} ${lastMsgShow}`}
             </h1>
             <h1 className='text-gray-500 text-sm mr-2' >
-              {moment(chaterWithCurrenUser.createdAt).format("hh:mm A")}
+              {getDateInRegualarFormat(chaterWithCurrenUser.lastMessage.createdAt)}
+
+              {/* {moment(chaterWithCurrenUser.createdAt).format("hh:mm A")} */}
             </h1>
           </div>
         );
@@ -152,7 +155,7 @@ function UserList({ searchKey, socket, onlineUsers }) {
       });
     // console.log("receipentUserId", receipentUserId);
     // console.log("user._id", user._id);
-    // console.log("allChats", allChats);
+    // console.log("allChats getUnreadMessage", allChats);
     // console.log("chaterWithCurrenUser", chaterWithCurrenUser);
     if (chaterWithCurrenUser) {
       // console.log("allChats", allChats);
@@ -198,9 +201,9 @@ function UserList({ searchKey, socket, onlineUsers }) {
 
   useEffect(() => {
     // socket.off("received-msg");
-    socket.on("received-msg", (msg) => {
+    socket.off("received-msg").on("received-msg", (msg) => {
       const tempSelectedChat = store.getState().chatReducer.selectChat;
-      const tempAllChats = store.getState().chatReducer.allChats;
+      let tempAllChats = store.getState().chatReducer.allChats;
       // console.log("===============tempSelectedChat======", tempSelectedChat);
       // console.log("===============tempAllChats======", tempAllChats);
       // console.log("===============msg======", msg);
@@ -219,9 +222,10 @@ function UserList({ searchKey, socket, onlineUsers }) {
             }
             else {
               // console.log("<<<<<<<<<<<<<<<<<<<receipent ");
+
               return {
                 ...chat,
-                unreadMessagesSender: (chat?.unreadMessagesSender || 0) + 1,
+                unreadMessagesSender: chat?.unreadMessagesSender + 1,
                 lastMessage: msg
               }
             }
@@ -229,12 +233,41 @@ function UserList({ searchKey, socket, onlineUsers }) {
           // console.log("received-msg..........received-msg..............", chat);
           return chat;
         });
-        dispatch(SetAllChats(updatedAllChats));
+        // console.log("received-msg..........-updatedAllChats..............", updatedAllChats);
+        tempAllChats = updatedAllChats;
       }
-    });
-  }, [])
 
-  console.log("onlineUsers", onlineUsers);
+      const lastedChat = tempAllChats.find(
+        (chat) => chat._id === msg.chat
+      )
+      const otherChats = tempAllChats.filter(
+        (chat) => chat._id !== msg.chat
+      )
+
+      tempAllChats = [lastedChat, ...otherChats];
+      // console.log(":::::::::::::: tempAllChats >>>>>>>>>>>>>", tempAllChats);
+      // console.log(" thuws tuwj usser vowis caht", getUserData());
+
+      //  TODO::sort user follow lastedChat
+      // const kien = tempAllChats.map((chat) => chat.members);
+      // const kien1 = kien.map(subArray => subArray.map(item => item._id))
+      //   .flat();
+      // const kien2 = kien1.filter((a) => a !== user._id)
+      // console.log("kiennnnnnnnnnnnnnnn", kien);
+      // console.log("kien11111111", kien1);
+      // console.log("kien2222", kien2);
+      // let user123 = getUserData();
+      // const userLastedChat = user123.find()
+      // const otherUserChatt = user123.filter()
+      // console.log("user123", user123);
+
+      dispatch(SetAllChats(tempAllChats));
+
+
+    });
+  }, [dispatch, socket])
+
+  // console.log("onlineUsers", onlineUsers);
 
   // console.log("getUserData", getUserData());
   // console.log("allChats", allChats);

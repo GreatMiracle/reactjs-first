@@ -11,3 +11,5 @@ npm i bcryptjs
 Node: npm i soket.io
 npm install cors socket.io
 React: npm i socket.io-client
+
+npm i emoji-picker-react
