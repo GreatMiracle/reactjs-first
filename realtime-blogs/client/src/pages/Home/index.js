@@ -52,7 +52,7 @@ function Home() {
       </div>
 
 
-      <div className='w-full'>
+      <div className='w-full '>
         <ChatArea
           socket={socket}
         />

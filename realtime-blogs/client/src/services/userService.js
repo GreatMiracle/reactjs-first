@@ -21,3 +21,13 @@ export const getAllUser = async () => {
         return error.response.data;
     }
 }
+
+export const updateProfilePictureApi = async (image) => {
+    try {
+        const response = await axios.post(AUTH_REST_API_BASE_URL + PATH_API_URL + "/update-profile-picture", { image });
+        return response.data;
+    } catch (error) {
+        return error.response.data;
+    }
+}
+

@@ -230,7 +230,7 @@ function ChatArea({ socket }) {
     return (
         <>
             {/* ------------------------------------------------HEADER-----------------------------------         */}
-            <div className='bg-white border rounded-2xl h-screen'>
+            <div className='bg-white border rounded-2xl h-[90vh]'>
                 {selectChat ? (
                     <div className='h-[90vh] flex flex-col justify-between p-5'>
                         <div>
@@ -306,7 +306,7 @@ function ChatArea({ socket }) {
                         < div >
                             <div className='h-12 rounded-xl flex justify-between flex-grow gap-2 ' >
                                 {showEmojiPicker &&
-                                    <div className='absolute bottom-5 left-20'>
+                                    <div className='absolute bottom-7 left-20'>
                                         {/* <div className='absolute top-96 left-20'> */}
                                         <EmojiPicker
                                             height={350}

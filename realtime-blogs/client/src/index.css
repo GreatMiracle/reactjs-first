@@ -32,3 +32,7 @@ input:focus {
     color: #706501;
     padding: 0 20px;
 }
+
+.file-input {
+    border: none !important;
+}

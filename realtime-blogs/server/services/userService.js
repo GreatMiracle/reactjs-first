@@ -1,5 +1,5 @@
 const User = require('../models/userModel');
-
+const cloudinary = require("../config/cloudinary")
 
 const getCurrentUserService = async (req, res) => {
     console.log("--------------------------------------GET CURRENT USER--------------------------------------------------");
@@ -46,7 +46,38 @@ const getAllUserService = async (req, res) => {
 }
 
 
+const updateProfilePictureService = async (req, res) => {
+    console.log("--------------------------------------UPDATE PROFILE PICTURE OF USER--------------------------------------------------");
+    try {
+        const image = req.body.image;
+
+        const uploadImage = await cloudinary.uploader
+            .upload(image
+                , { folder: "chat-app" }
+                , (error, result) => {
+                    console.log(result, error);
+                });
+
+        const userUp = await User.findOneAndUpdate({ _id: req.body.userId }
+            , { profilePic: uploadImage.secure_url }
+            , { new: true })
+
+        return res.send({
+            message: "Profile picture updated successfully!",
+            success: true,
+            data: userUp
+        })
+    } catch (error) {
+        return res.send({
+            message: error.message,
+            success: false
+        })
+    }
+}
+
+
 module.exports = {
     getCurrentUserService
     , getAllUserService
+    , updateProfilePictureService
 }

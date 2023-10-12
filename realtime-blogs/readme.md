@@ -9,7 +9,7 @@ mongodb+srv://realtime:<password>@cluster0.nl9hgwi.mongodb.net/admin?authSource=
 npm i bcryptjs
 
 Node: npm i soket.io
-npm install cors socket.io
-React: npm i socket.io-client
+npm install cors socket.io, npm i cloudinary
+React: npm i socket.io-client, npm i emoji-picker-react
 
-npm i emoji-picker-react
+

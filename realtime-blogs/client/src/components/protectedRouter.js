@@ -68,11 +68,20 @@ function ProtectedRouter({ children }) {
       <div className='flex justify-between p-2 bg-primary rounded'>
         <div className='flex items-center gap-1'>
           <i className="ri-message-3-line text-3xl text-white"></i>
-          <h1 className='text-white text-3xl font-bold'>ChatBOT</h1>
+          <h1 className='text-white text-3xl font-bold'
+            onClick={() => navigate("/")}>ChatBOT</h1>
         </div>
         <div className='flex gap-1 text-2xl items-center'>
-          <i className="ri-shield-user-line text-2xl text-white"></i>
-          <h1 className="underline text-white">{user?.name}</h1>
+          {user?.profilePic &&
+            <img src={user?.profilePic}
+              alt='profile'
+              className='h-8 w-8 rounded-full object-cover' />
+          }
+          {!user?.profilePic && <i className="ri-shield-user-line text-2xl text-white"></i>}
+          {/* <i className="ri-shield-user-line text-2xl text-white"></i> */}
+          <h1 className="underline text-white"
+            onClick={() => navigate("/profile")}
+          >{user?.name}</h1>
           <div className='group relative'>
             <i className="ri-logout-circle-r-line text-2xl pl-5 cursor-pointer text-white"
               onClick={() => {

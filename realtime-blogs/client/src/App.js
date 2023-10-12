@@ -7,6 +7,7 @@ import ProtectedRouter from './components/protectedRouter';
 import { useSelector } from 'react-redux';
 import Loader from './components/loader';
 import 'remixicon/fonts/remixicon.css'
+import Profile from './pages/Profile';
 
 function App() {
 
@@ -22,6 +23,13 @@ function App() {
           <Route path="/" element={
             <ProtectedRouter >
               <Home />
+            </ProtectedRouter>
+
+          }></Route>
+
+          <Route path="/profile" element={
+            <ProtectedRouter >
+              <Profile />
             </ProtectedRouter>
 
           }></Route>
