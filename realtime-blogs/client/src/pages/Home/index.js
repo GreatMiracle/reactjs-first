@@ -13,8 +13,10 @@ function Home() {
 
   const [searchKey, setSearchKey] = useState("");
   const { user } = useSelector((state) => state.userReducer);
+  const { selectChat } = useSelector((state) => state.chatReducer);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
+  const { backGroundColorMsg } = useSelector(state => state.loader);
 
   useEffect(() => {
     socket.emit("join-room", user._id);
@@ -51,12 +53,32 @@ function Home() {
         />
       </div>
 
+      {
+        selectChat ? (<div className='w-full '>
+          <ChatArea
+            socket={socket}
+          />
+        </div>
+        ) : (
+          <div className='w-full'>
+            <div className={`${backGroundColorMsg ? "bg-white" : "bg-gray-700"} border rounded-2xl h-[90vh] items-center flex justify-center flex-col`}>
+              {/* <div className='bg-gray-800 border rounded-2xl h-[90vh] items-center flex justify-center flex-col'> */}
+              <img
+                // src='/image/Speech-Chat-Icon-Transparent-PNG.png'
+                src='/image/Chat-Icon-PNG-Pic.png'
+                alt=''
+                className='w-80 h-80'
+              />
+              {/* <h1 className='text-3xl font-semibold text-gray-500'>
+                Select a user to chat
+              </h1> */}
+              <h1 className='text-4xl font-semibold text-gray-500'>Welcome</h1>
+              <p className='text-2xl  font-semibold text-gray-500'>Ready? Set. Chat! Let's jump right into things.</p>
+            </div>
+          </div>
+        )
+      }
 
-      <div className='w-full '>
-        <ChatArea
-          socket={socket}
-        />
-      </div>
 
     </div>
   )

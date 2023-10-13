@@ -30,6 +30,7 @@ function UserList({ searchKey, socket, onlineUsers }) {
   const dispatch = useDispatch();
   const { allUsers, user } = useSelector(state => state.userReducer);
   const { allChats, selectChat } = useSelector(state => state.chatReducer);
+  const { backGroundColorMsg } = useSelector(state => state.loader);
 
   const getUserData = () => {
     return allUsers
@@ -122,11 +123,13 @@ function UserList({ searchKey, socket, onlineUsers }) {
 
         const text = chaterWithCurrenUser.lastMessage.text;
         const lastMsgShow = TruncateText({ text });
+        let lastMsgShowContainImg;
+        chaterWithCurrenUser.lastMessage.image ? lastMsgShowContainImg = "[image]" : lastMsgShowContainImg = "";
         // return `${personSendLastMsg} ${lastMsgShow} `;
         return (
           <div className='flex justify-between w-72'>
             <h1 className='text-gray-500 text-sm'>
-              {`${personSendLastMsg} ${lastMsgShow}`}
+              {`${personSendLastMsg} ${lastMsgShow} ${lastMsgShowContainImg}`}
             </h1>
             <h1 className='text-gray-500 text-sm mr-2' >
               {getDateInRegualarFormat(chaterWithCurrenUser.lastMessage.createdAt)}
@@ -276,23 +279,30 @@ function UserList({ searchKey, socket, onlineUsers }) {
     <div className='flex flex-col gap-3 mt-5 w-96'>
       {getUserData()
         .map((userItem) => {
-
+          console.log("userItem-------------", userItem);
           return (
             <div
               key={userItem._id}
-              className={`shadow-sm border p-3 rounded-2xl bg-white flex justify-between items-center  cursor-pointer w-full 
-              ${getSelectChatOrNot(userItem._id) && 'border-primary border-2'}
+              className={`${backGroundColorMsg ? "bg-white border-primary" : "bg-gray-200 border-blue-500 "} shadow-sm border p-3 rounded-2xl flex justify-between items-center  cursor-pointer w-full 
+              ${getSelectChatOrNot(userItem._id) && ' border-2'}
               `}
               onClick={() => openChat(userItem._id)}
             >
               <div className='flex gap-3 items-center w-full'>
-                {userItem.profilePic && (
-                  <img src={userItem.profilePic}
-                    alt='profile Pic'
-                    className='w-10 h-10 rounded-full'
-                  />
-                )}
-                {!userItem.profilePic && (
+
+                {userItem.profilePic ? (
+                  <div className='rounded-full w-10 h-10 flex items-center justify-center mx-1 relative'>
+                    <img src={userItem.profilePic}
+                      alt='profile Pic'
+                      className='w-10 h-10 rounded-full'
+                    />
+                    {onlineUsers.includes(userItem._id) && (
+                      <div >
+                        <div className='bg-green-500 h-3 w-3 rounded-full absolute bottom-[3px] right-0'></div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
                   <div
                     className={`${getRandomColor()} text-white rounded-full w-10 h-10 flex items-center justify-center mx-1 relative`} >
                     <h1 className='uppercase text-4xl font-semibold'>{userItem.name[0]} </h1>

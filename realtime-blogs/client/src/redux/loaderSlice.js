@@ -4,7 +4,8 @@ const loaderSlice = createSlice({
 
     name: "loader",
     initialState: {
-        loader: false
+        loader: false,
+        backGroundColorMsg: true
     },
 
     reducers: {
@@ -14,10 +15,19 @@ const loaderSlice = createSlice({
 
         HideLoader: (state) => {
             state.loader = false;
+        },
+
+        LightBgLoader: (state) => {
+            state.backGroundColorMsg = true;
+        },
+
+
+        DarkBgLoader: (state) => {
+            state.backGroundColorMsg = false;
         }
     }
 
 });
 
-export const { ShowLoader, HideLoader } = loaderSlice.actions;
+export const { ShowLoader, HideLoader, LightBgLoader, DarkBgLoader } = loaderSlice.actions;
 export default loaderSlice;

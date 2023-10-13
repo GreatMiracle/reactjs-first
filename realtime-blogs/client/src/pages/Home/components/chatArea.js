@@ -20,10 +20,11 @@ function ChatArea({ socket }) {
     const [message, setMessage] = useState([]);
     const dispatch = useDispatch();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
     const [isReceipentTyping, setIsReceipentTyping] = useState(false);
-
     const [image, setImage] = useState("");
+    const [imagePreview, setImagePreview] = useState("");
+    const [showImagePreview, setShowImagePreview] = useState(true);
+    const { backGroundColorMsg } = useSelector(state => state.loader);
 
     const receipentUserId = selectChat?.members.find((m) => m._id !== user._id);
 
@@ -116,9 +117,6 @@ function ChatArea({ socket }) {
         }
     }, [message, isReceipentTyping]);
 
-
-
-
     const fetchAllMessages = async () => {
         try {
             dispatch(ShowLoader());
@@ -139,7 +137,12 @@ function ChatArea({ socket }) {
     const handleKeyDown = (event) => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            handleSendMessage(event)
+            if (newMessage || image !== "") {
+                handleSendMessage()
+            } else {
+                console.log("Please enter your message before sending");
+                toast.error("Please enter your message before sending")
+            }
             messageInputRef.current.focus();
         }
     };
@@ -154,6 +157,7 @@ function ChatArea({ socket }) {
                 text: newMessage,
                 image: image ? image : ""
             }
+
 
             //send message to server using soket
             console.log("message kien", message);
@@ -187,27 +191,19 @@ function ChatArea({ socket }) {
                 // fetchAllMessages();
                 messageInputRef.current.focus();
             }
+            cancelImage()
         } catch (error) {
             dispatch(HideLoader());
+            cancelImage()
             toast.error(error.message)
         }
     };
 
     const clearUnreadMessage = async () => {
         try {
-
-
-
-            // socket.emit("clear-unread-message", {
-            //     chat: selectChat._id,
-            //     members: selectChat.members.map((mem) => mem._id)
-            // })
-
-            // dispatch(ShowLoader());
             // console.log("-------------------clearUnreadMessage--------------");
             const response = await clearChatMessageApi(selectChat?._id);
             // console.log(" clearUnreadMessage response", response);
-            // dispatch(HideLoader());
 
             if (response.success) {
                 const updateChats = allChats.map((chat) => {
@@ -223,30 +219,44 @@ function ChatArea({ socket }) {
                 // console.log("updateChats", allChats);
             }
         } catch (error) {
-            // dispatch(HideLoader());
             toast.error(error.message)
         }
     }
     console.log("message", message);
 
     const onSendImage = (e) => {
+        setShowImagePreview(true);
         const file = e.target.files[0];
         const reader = new FileReader(file);
         reader.readAsDataURL(file);
         reader.onload = async () => {
             console.log("Image>>>>>>>>", reader.result);
-            setImage(reader.result);
-            // handleSendMessage(reader.result)
+            const imageData = reader.result;
+            if (imageData) {
+                setImage(imageData);
+                setImagePreview(imageData);
+                setShowImagePreview(true);
+            }
+            // handleSendMessage()
+            console.log("file", file);
 
         }
-        console.log("file", file);
+        console.log("imageData", image);
     }
+
+    const cancelImage = () => {
+        setImage("");
+        setImagePreview("");
+        setShowImagePreview(false); // Đảo ngược trạng thái hiển thị hình ảnh
+    }
+
     console.log("image=1==========>", image);
 
     return (
         <>
             {/* ------------------------------------------------HEADER-----------------------------------         */}
-            <div className='bg-white border rounded-2xl h-[90vh]'>
+            <div className={`${backGroundColorMsg ? "bg-white" : "bg-gray-700"} border rounded-2xl h-[90vh]`}>
+                {/* <div className='bg-white border rounded-2xl h-[90vh]'> */}
                 {selectChat ? (
                     <div className='h-[90vh] flex flex-col justify-between p-5'>
                         <div>
@@ -263,7 +273,9 @@ function ChatArea({ socket }) {
                                         <h1 className='uppercase text-4xl font-semibold'>{receipentUserId.name[0]} </h1>
                                     </div>
                                 )}
-                                <h1 className='uppercase'>{receipentUserId.name}</h1>
+                                <h1
+                                    className={`${backGroundColorMsg ? "" : "text-white"} uppercase`}
+                                >{receipentUserId.name}</h1>
                             </div>
                             <hr />
                         </div>
@@ -286,11 +298,12 @@ function ChatArea({ socket }) {
                                                         } p-2 rounded-xl
                                                         `}
                                                     >{msg.text}</h1>
+                                                    {console.log("msg=========>>", msg)}
                                                     {msg.image && (
                                                         <img
                                                             src={msg.image}
                                                             alt=""
-                                                            className="w-24 h-24 rounded-xl"
+                                                            className="w-80 rounded-xl"
                                                         />
                                                     )}
                                                     <h1 className='text-gray-500 text-sm'>{
@@ -342,29 +355,48 @@ function ChatArea({ socket }) {
 
 
                                 <div className='flex gap-2'>
-
                                     <label for="file" >
-                                        <i class="ri-folder-image-line cursor-pointer text-3xl items-center justify-center"
+                                        <i
+                                            className={`${backGroundColorMsg ? "" : "text-gray-200"} ri-folder-image-line cursor-pointer text-3xl items-center justify-center`}
+                                            // className="ri-folder-image-line cursor-pointer text-3xl items-center justify-center"
                                             typeof='file' />
                                         <input type='file'
                                             id='file'
                                             style={{ display: 'none' }}
                                             accept='image/gift,image/jpeg,image/png,image/jpg'
                                             onChange={onSendImage}
+
                                         >
                                         </input>
 
                                     </label>
-                                    <i className="ri-emoji-sticker-line cursor-pointer text-3xl items-center justify-center"
+                                    <i
+                                        className={`${backGroundColorMsg ? "" : "text-gray-200"} ri-emoji-sticker-line cursor-pointer text-3xl items-center justify-center`}
+                                        // className="ri-emoji-sticker-line cursor-pointer text-3xl items-center justify-center"
                                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}></i>
                                 </div>
 
+                                {imagePreview && showImagePreview && (
+                                    <div className='absolute bottom-7 left-20'>
+                                        <img
+                                            src={imagePreview}
+                                            alt=""
+                                            className='w-80 rounded-xl'
+                                        />
+                                        <button
+                                            onClick={cancelImage}
+                                            className='text-red-500 font-bold rounded-full bg-gray-300 w-8 h-8 flex items-center justify-center absolute top-0 right-0 cursor-pointer'
+                                        >
+                                            X
+                                        </button>
+                                    </div>
 
+                                )}
                                 <input
                                     ref={messageInputRef}
                                     type='text'
                                     placeholder="Type a message"
-                                    className='flex-grow h-full rounded-xl border-gray-500 shadow border'
+                                    className={`${backGroundColorMsg ? "bg-white" : "bg-gray-200"} flex-grow h-full rounded-xl border-gray-500 shadow border`}
                                     value={newMessage}
                                     onKeyDown={(e) => handleKeyDown(e)}
                                     onChange={(e) => {

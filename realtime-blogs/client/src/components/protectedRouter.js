@@ -3,7 +3,7 @@ import { getAllUser, getCurrentUser } from '../services/userService';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
-import loaderSlice from '../redux/loaderSlice';
+import loaderSlice, { DarkBgLoader, LightBgLoader } from '../redux/loaderSlice';
 import { useSelector } from 'react-redux';
 import { SetAllUser, SetUser } from '../redux/userSlice';
 import { logout } from '../services/authService';
@@ -11,8 +11,10 @@ import { getAllChats } from '../services/chatService';
 import { SetAllChats } from '../redux/chatSlice';
 
 function ProtectedRouter({ children }) {
+
   const dispatch = useDispatch();
   const { user } = useSelector(state => state.userReducer);
+  const { backGroundColorMsg } = useSelector(state => state.loader);
   // const [user, setUser] = useState([]);
   const navigate = useNavigate();
 
@@ -63,15 +65,52 @@ function ProtectedRouter({ children }) {
     return null;
   }
 
+
+  const changeBackGroundColorLightDark = () => {
+    console.log("backGroundColorMsg", backGroundColorMsg);
+    if (backGroundColorMsg) {
+      console.log("sáng -> tối");
+      dispatch(DarkBgLoader())
+    } else {
+      console.log("tối -> sáng");
+      dispatch(LightBgLoader())
+    }
+
+  }
+
   return (
-    <div className="bg-gray-100 p-2 min-h-screen">
-      <div className='flex justify-between p-2 bg-primary rounded'>
+    <div className={`${backGroundColorMsg ? "bg-gray-100" : "bg-gray-500"} p-2 min-h-screen`}>
+      <div className='flex justify-between p-2 bg-primary rounded sticky top-0 z-50' >
         <div className='flex items-center gap-1'>
           <i className="ri-message-3-line text-3xl text-white"></i>
           <h1 className='text-white text-3xl font-bold'
             onClick={() => navigate("/")}>ChatBOT</h1>
         </div>
-        <div className='flex gap-1 text-2xl items-center'>
+        <div className='flex gap-2 text-2xl items-center'>
+          <div className='pr-5'>
+
+
+            {backGroundColorMsg ? (
+              <i className="ri-moon-clear-line text-2xl text-white cursor-pointer"
+                onClick={() => {
+                  changeBackGroundColorLightDark()
+
+                }}
+              ></i>
+            )
+              :
+              (
+                <i className="ri-sun-line text-2xl text-white cursor-pointer"
+                  onClick={() => {
+                    changeBackGroundColorLightDark()
+
+                  }}
+                ></i>
+              )
+            }
+
+          </div>
+
           {user?.profilePic &&
             <img src={user?.profilePic}
               alt='profile'

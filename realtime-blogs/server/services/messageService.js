@@ -5,8 +5,8 @@ const Chat = require('../models/chatModel');
 const createNewMessageService = async (req, res) => {
     console.log("--------------------------------------CREATE MESSAGE--------------------------------------------------");
     try {
-        const { chat, sender, text } = req.body.message;
-        const newMessage = new Message({ chat, sender, text });
+        const { chat, sender, text, image } = req.body.message;
+        const newMessage = new Message({ chat, sender, text, image });
         const saveMessage = await newMessage.save();
 
         // const chatUp = await Chat.findOneAndUpdate(
