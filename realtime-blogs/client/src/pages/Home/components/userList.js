@@ -33,13 +33,19 @@ function UserList({ searchKey, socket, onlineUsers }) {
   const { backGroundColorMsg } = useSelector(state => state.loader);
 
   const getUserData = () => {
+    console.log("allChattttt", allChats);
     return allUsers
       .filter((u) => {
+
         return (
           u.name.toLowerCase().includes(searchKey.toLowerCase())
           && searchKey
         )
-          || allChats.some((chat) => chat.members.map((mem) => mem._id).includes(u._id))
+          || (
+            allChats &&
+            allChats.length > 0 &&
+            allChats.some((chat) => chat.members && chat.members.some((mem) => mem._id === u._id))
+          )
       })
   }
 
